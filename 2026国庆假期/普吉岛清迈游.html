@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 国庆 · 普吉岛清迈游（HTML 版）</title>
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --card: #ffffff;
+    --border: #e5e7eb;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --primary: #0ea5e9;
+    --primary-dark: #0369a1;
+    --accent: #f59e0b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  header {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%);
+    color: #fff;
+    padding: 28px 24px;
+  }
+  header h1 { margin: 0 0 6px; font-size: 26px; }
+  header .sub { opacity: 0.9; font-size: 14px; }
+  main { max-width: 1100px; margin: 0 auto; padding: 24px; }
+  section { margin-bottom: 32px; }
+  h2 {
+    border-left: 4px solid var(--primary);
+    padding-left: 12px;
+    font-size: 22px;
+    margin: 0 0 16px;
+  }
+  h3 { font-size: 17px; margin: 0 0 8px; color: var(--primary-dark); }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    transition: box-shadow 0.2s;
+  }
+  .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+  .card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+    background: #e5e7eb;
+  }
+  .card .body { padding: 14px 18px; }
+  .meta { color: var(--muted); font-size: 13px; margin-bottom: 8px; }
+  .stars { color: var(--accent); font-weight: 600; }
+  @media (max-width: 720px) {
+    .card { grid-template-columns: 1fr; }
+    .card img { height: 180px; }
+  }
+  .flight-table, .day-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .flight-table th, .day-table th {
+    background: var(--primary-dark);
+    color: #fff;
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 14px;
+  }
+  .flight-table td, .day-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .flight-table tr:last-child td, .day-table tr:last-child td { border-bottom: none; }
+  iframe { border: 0; width: 100%; height: 480px; border-radius: 10px; }
+  .map-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px;
+  }
+  .note {
+    background: #fef3c7;
+    border-left: 4px solid var(--accent);
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #78350f;
+  }
+  ul.check li { list-style: none; padding-left: 20px; position: relative; margin-bottom: 4px; }
+  ul.check li::before { content: "✓"; color: var(--primary); position: absolute; left: 0; font-weight: 700; }
+  .img-credit { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  /* 修复：图片加载失败时仍显示占位 */
+  img.broken { background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>2026 国庆 · 普吉岛清迈游</h1>
+  <div class="sub">HTML 版（含景点实景图 + OSM 可交互地图） · 与 普吉岛清迈游.md 同步维护</div>
+</header>
+
+<main>
+
+<!-- ============================ 行程概览 ============================ -->
+<section>
+  <h2>行程概览</h2>
+  <ul class="check">
+    <li><strong>行程天数</strong>：10 天（9/25 – 10/4）</li>
+    <li><strong>请假安排</strong>：9/28（周一）、9/29（周二）、9/30（周三）共 3 天</li>
+    <li><strong>出发地</strong>：上海</li>
+    <li><strong>路线</strong>：上海 → 普吉岛 → 清迈 → 上海</li>
+    <li><strong>停留分配</strong>：普吉 5 晚（9/25–9/30）+ 清迈 4 晚（9/30–10/3）</li>
+  </ul>
+</section>
+
+<!-- ============================ 航班 ============================ -->
+<section>
+  <h2>航班（已确定，不再改动）</h2>
+  <table class="flight-table">
+    <thead>
+      <tr><th>航段</th><th>航班</th><th>日期</th><th>时段</th><th>备注</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>上海-普吉岛</td><td>9C8665（春秋）</td><td>9/25</td><td>PVG 12:10 → HKT 16:30 直飞</td><td>预留前往浦东机场时间，不能太早起飞</td></tr>
+      <tr><td>普吉岛-清迈</td><td>FD3159（亚航）</td><td>9/30</td><td>HKT 10:55 → CNX 12:45 直飞</td><td>—</td></tr>
+      <tr><td>清迈-上海</td><td>9C8512（春秋）</td><td>10/4</td><td>CNX 08:45 → SHA 13:50</td><td>预留浦东机场回家时间，不能太晚到达</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================ 普吉岛地图 ============================ -->
+<section>
+  <h2>🗺️ 普吉岛景点地图</h2>
+  <div class="map-wrap">
+    <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=98.20%2C7.70%2C98.42%2C7.96&amp;layer=mapnik&amp;marker=7.8440%2C98.2934"
+      loading="lazy"></iframe>
+  </div>
+  <p class="img-credit">数据来源：OpenStreetMap（需联网加载）。可点击放大查看具体位置。</p>
+</section>
+
+<!-- ============================ 普吉岛景点 ============================ -->
+<section>
+  <h2>🏖️ 普吉岛景点</h2>
+
+  <div class="card">
+    <img src="https://loremflickr.com/640/400/karon,beach,thailand,sunset" alt="卡伦海滩" onerror="this.classList.add('broken')">
+    <div class="body">
+      <h3>A. 卡伦海滩 Karon Beach ⭐⭐⭐⭐⭐</h3>
+      <div class="meta">📍 卡伦海滩区 · 建议 3-4 小时（傍晚最佳，可看日落）</div>
+      <p>普吉三大海滩之一，沙质细腻、海滩宽阔、海浪中等。比芭东安静、比卡塔热闹，是"无脑泡"的最佳选择。</p>
+      <div class="img-credit">图：LoremFlickr（基于 Flickr 真实照片，关键词检索）</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <img src="https://loremflickr.com/640/400/kata,beach,phuket,viewpoint" alt="卡塔+大佛观景台" onerror="this.classList.add('broken')">
+    <div class="body">
+      <h3>B. 卡塔海滩 + 大佛观景台 ⭐⭐⭐⭐</h3>
+      <div class="meta">📍 卡塔海滩区 · 建议 3-4 小时</div>
+      <p>卡塔海滩水更清更浅；大佛观景台能俯瞰卡伦+卡塔+小卡达三个海湾，是普吉最经典明信片角度。玩水拍照打包到半天。</p>
+      <div class="img-credit">图：LoremFlickr</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <img src="https://loremflickr.com/640/400/promthep,cape,phuket,sunset" alt="神仙半岛" onerror="this.classList.add('broken')">
+    <div class="body">
+      <h3>C. 神仙半岛 Promthep Cape ⭐⭐⭐⭐</h3>
+      <div class="meta">📍 普吉岛最南端 · 建议 1.5-2 小时（傍晚 16:30 后去）</div>
+      <p>普吉岛最南端突出的小半岛，巨岩+灯塔+270° 海景，被誉为普吉看日落第一选择。无需体力，老人小孩无压力。</p>
+      <div class="img-credit">图：LoremFlickr</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <img src="https://loremflickr.com/640/400/phi,phi,island,thailand,beach" alt="皮皮岛" onerror="this.classList.add('broken')">
+    <div class="body">
+      <h3>D. 皮皮岛 / 皇帝岛一日游 ⭐⭐⭐⭐⭐</h3>
+      <div class="meta">📍 查龙码头出发 · 建议全天（07:00-17:00）</div>
+      <p>快艇出海一日游，含浮潜+午餐+接送，风景远超普吉本岛。老人小孩可选"豪华快艇"团（不颠簸）。来普吉必做。</p>
+      <div class="img-credit">图：LoremFlickr</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <img src="https://loremflickr.com/640/400/phuket,thailand,night" alt="幻多奇乐园（示意）" onerror="this.classList.add('broken')">
+    <div class="body">
+      <h3>E. 幻多奇主题乐园 FantaSea ⭐⭐⭐</h3>
+      <div class="meta">📍 卡马拉海滩区 · 建议 17:00-22:00</div>
+      <p>大型泰文化主题乐园+自助餐+拉斯维加斯级歌舞秀。一个点覆盖"晚餐+表演"，避雨或不想动脑的晚上首选。</p>
+      <div class="img-credit">图：LoremFlickr</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <img src="https://loremflickr.com/640/400/elephant,thailand,sanctuary" alt="大象保护营" onerror="this.classList.add('broken')">
+    <div class="body">
+      <h3>F. 大象保护营 Elephant Nature Park ⭐⭐⭐⭐</h3>
+      <div class="meta">📍 普吉中部山区 · 建议半天（08:00-13:00）</div>
+      <p>非营利大象保护营，<strong>不骑大象</strong>，只观察、喂食、洗澡。老人小孩对大象天然好感，互动性强，符合动物保护伦理。</p>
+      <div class="img-credit">图：LoremFlickr</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <img src="https://loremflickr.com/640/400/wat,chalong,phuket,temple" alt="查龙寺" onerror="this.classList.add('broken')">
+    <div class="body">
+      <h3>G. 查龙寺 Wat Chalong ⭐⭐⭐</h3>
+      <div class="meta">📍 查龙区 · 建议 1-1.5 小时</div>
+      <p>普吉最大最华丽的佛教寺庙，金碧辉煌，适合拍照+了解泰国佛教文化。庙内平缓，遮阴凉快，老人友好。</p>
+      <div class="img-credit">图：LoremFlickr</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <img src="https://loremflickr.com/640/400/patong,phuket,nightlife" alt="巴东江西冷" onerror="this.classList.add('broken')">
+    <div class="body">
+      <h3>H. 巴东闹市区 + 江西冷商场 ⭐⭐⭐</h3>
+      <div class="meta">📍 巴东区 · 建议 2-3 小时（晚上）</div>
+      <p>酒吧街+夜市+商场，吃喝购物一站搞定。酒吧街老人小孩可不去；江西冷适合采购手信。</p>
+      <div class="img-credit">图：LoremFlickr</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 清迈地图 ============================ -->
+<section>
+  <h2>🗺️ 清迈景点地图</h2>
+  <div class="map-wrap">
+    <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=98.92%2C18.74%2C99.04%2C18.86&amp;layer=mapnik&amp;marker=18.7880%2C98.9853"
+      loading="lazy"></iframe>
+  </div>
+  <p class="img-credit">数据来源：OpenStreetMap（需联网加载）。双龙寺位于古城西 15km 山区，本图未包含；详见下方景点卡。</p>
+</section>
+
+<!-- ============================ 清迈景点 ============================ -->
+<section>
+  <h2>🐘 清迈景点</h2>
+
+  <div class="card">
+    <img src="https://loremflickr.com/640/400/chiang,mai,old,city,temple" alt="清迈古城寺庙" onerror="this.classList.add('broken')">
+    <div class="body">
+      <h3>I. 古城寺庙游（塔佩门+帕辛寺+契迪龙寺） ⭐⭐⭐⭐⭐</h3>
+      <div class="meta">📍 清迈古城内 · 建议 3-4 小时（上午 09:00 出发最凉快）</div>
+      <p>塔佩门是古城地标；帕辛寺是清迈最大最华丽寺庙；契迪龙寺有标志性大佛塔。清迈精华半日，全部步行可达，几乎无体力负担。</p>
+      <div class="img-credit">图：LoremFlickr</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <img src="https://loremflickr.com/640/400/nimman,road,chiang,mai" alt="宁曼路" onerror="this.classList.add('broken')">
+    <div class="body">
+      <h3>J. 宁曼路 Nimmanhaemin Road ⭐⭐⭐⭐</h3>
+      <div class="meta">📍 古城西北 1.5km · 建议 2-3 小时（下午/傍晚）</div>
+      <p>清迈"小资一条街"，咖啡馆、设计师店、网红餐厅密集。节奏慢，适合下午茶+闲逛+吃晚饭。</p>
+      <div class="img-credit">图：LoremFlickr</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <img src="https://loremflickr.com/640/400/elephant,sanctuary,chiang,mai" alt="美丹大象营" onerror="this.classList.add('broken')">
+    <div class="body">
+      <h3>K. 美丹大象营 Mae Taeng ⭐⭐⭐⭐</h3>
+      <div class="meta">📍 清迈以北约 60km · 建议半天到全天</div>
+      <p>清迈周边的大象保护营/营地，可看大象洗澡、表演、合影，<strong>比骑象营地更柔和</strong>。清迈最经典一日游产品，适合一家老小。</p>
+      <div class="img-credit">图：LoremFlickr</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <img src="https://loremflickr.com/640/400/doi,suthep,temple,chiang,mai" alt="双龙寺" onerror="this.classList.add('broken')">
+    <div class="body">
+      <h3>L. 双龙寺 Wat Phra That Doi Suthep ⭐⭐⭐⭐⭐</h3>
+      <div class="meta">📍 素帖山（古城西 15km）· 建议 2-3 小时（含上下山车程）</div>
+      <p>清迈地标，建在素帖山上，金顶佛塔+俯瞰全城视野。登顶有 309 级台阶，体力不济可坐缆车；山顶凉爽，与古城差异大。</p>
+      <div class="img-credit">图：LoremFlickr</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <img src="https://loremflickr.com/640/400/chiang,mai,night,bazaar" alt="清迈夜市" onerror="this.classList.add('broken')">
+    <div class="body">
+      <h3>M. 清迈夜市（长康/周六/周日步行街） ⭐⭐⭐⭐⭐</h3>
+      <div class="meta">📍 长康夜市：古城东门外 · 建议 2-3 小时（晚上）</div>
+      <p>长康夜市常年开放；周六夜市只在周六晚；周日步行街只在周日下午到晚上。吃小吃、买手信的必去。<strong>10/3（周六）正好赶上周六夜市</strong>。</p>
+      <div class="img-credit">图：LoremFlickr</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <img src="https://loremflickr.com/640/400/chiang,mai,university" alt="清迈大学" onerror="this.classList.add('broken')">
+    <div class="body">
+      <h3>N. 清迈大学 + 宁曼路 ⭐⭐⭐</h3>
+      <div class="meta">📍 古城西北 · 建议 2-3 小时</div>
+      <p>清迈大学校园漂亮+湖畔咖啡，宁曼路紧邻。轻松半日，校园平缓适合老人。</p>
+      <div class="img-credit">图：LoremFlickr</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 每日行程 ============================ -->
+<section>
+  <h2>📅 每日行程（草案）</h2>
+
+  <h3 style="margin-top: 20px;">普吉岛段（9/25-9/30，6 天 5 晚）</h3>
+  <table class="day-table">
+    <thead><tr><th>日期</th><th>主景点</th><th>辅助/晚上</th><th>区域</th></tr></thead>
+    <tbody>
+      <tr><td>9/25 周五·中秋</td><td>抵达+酒店休整</td><td>酒店泳池或卡伦海滩看日落</td><td>卡伦/卡塔</td></tr>
+      <tr><td>9/26 周六·中秋</td><td>D. 皮皮岛/皇帝岛一日游</td><td>跟团回酒店休息</td><td>查龙码头</td></tr>
+      <tr><td>9/27 周日</td><td>A. 卡伦海滩 + B. 大佛观景台</td><td>卡伦夜市</td><td>卡伦</td></tr>
+      <tr><td>9/28 周一（请假）</td><td>F. 大象保护营（上午）</td><td>G. 查龙寺（下午）→ 班赞市场</td><td>查龙/巴东</td></tr>
+      <tr><td>9/29 周二（请假）</td><td>C. 神仙半岛（上午+日落）</td><td>H. 巴东江西冷商场</td><td>巴东</td></tr>
+      <tr><td>9/30 周三</td><td>退房 → 10:55 飞清迈</td><td>12:45 抵清迈 → M. 长康夜市</td><td>清迈</td></tr>
+    </tbody>
+  </table>
+
+  <h3 style="margin-top: 24px;">清迈段（9/30-10/4，5 天 4 晚）</h3>
+  <table class="day-table">
+    <thead><tr><th>日期</th><th>主景点</th><th>辅助/晚上</th><th>区域</th></tr></thead>
+    <tbody>
+      <tr><td>9/30 周三</td><td>入住休整</td><td>M. 长康夜市</td><td>古城东/长康</td></tr>
+      <tr><td>10/1 周四·国庆</td><td>I. 古城寺庙游（上午）</td><td>J. 宁曼路（下午+晚餐）</td><td>古城/宁曼</td></tr>
+      <tr><td>10/2 周五</td><td>L. 双龙寺（上午）</td><td>K. 美丹大象营（下午）</td><td>古城</td></tr>
+      <tr><td>10/3 周六·国庆</td><td>机动日：清迈大学+宁曼路咖啡/SPA</td><td>M. 周六夜市（仅周六晚）</td><td>古城/宁曼</td></tr>
+      <tr><td>10/4 周日</td><td>退房 → 08:45 飞上海</td><td>13:50 抵虹桥</td><td>—</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================ 待确认 ============================ -->
+<section>
+  <h2>❓ 待确认</h2>
+  <ol>
+    <li>普吉岛段：是否分 2 个区域住（卡伦 3 晚 + 巴东 1 晚）？还是全程卡伦？</li>
+    <li>普吉 9/28 大象保护营 vs 幻多奇主题乐园——二选一</li>
+    <li>普吉 9/29 是否需要换酒店到巴东？</li>
+    <li>清迈段全部景点是否都接受？有无要替换的？</li>
+    <li>确定后再回头填具体酒店推荐（按"区域"列选择就近酒店）</li>
+  </ol>
+</section>
+
+<!-- ============================ 说明 ============================ -->
+<section>
+  <h2>ℹ️ 关于本 HTML 文件</h2>
+  <div class="note">
+    <strong>图片来源</strong>：所有景点配图均通过 <a href="https://loremflickr.com/" target="_blank">LoremFlickr</a> 获取，基于 Flickr 真实照片，按关键词检索。LoremFlickr 每次访问可能返回该关键词下的不同图片，因此显示可能略有不一致。
+    <br><br>
+    <strong>地图来源</strong>：OpenStreetMap 可交互 iframe，标注了主要区域中心点。Marker 暂只放了中心点，可在 OSM 网页搜索具体景点查看精确位置。
+    <br><br>
+    <strong>与 .md 的同步</strong>：本 HTML 是 .md 文档的可视化伴侣。两份文件并行维护，更新时请保持一致。
+  </div>
+</section>
+
+</main>
+
+</body>
+</html>
