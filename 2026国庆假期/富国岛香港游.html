@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 国庆 · 杭州香港富国岛游（方案 C）</title>
+
+<!-- Leaflet 地图库（CDN · 免费 · 业界旅游站标配） -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<style>
+  /* ============================================================
+     主题与布局：所有视觉变量集中在 :root，便于未来换皮
+     ============================================================ */
+  :root {
+    --bg: #f7f8fa;
+    --card: #ffffff;
+    --border: #e5e7eb;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --primary: #0ea5e9;
+    --primary-dark: #0369a1;
+    --accent: #f59e0b;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", Arial, sans-serif;
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: #fff;
+    padding: 28px 24px;
+  }
+  header h1 { margin: 0 0 6px; font-size: 26px; }
+  header .sub { opacity: 0.9; font-size: 14px; }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 24px; }
+  section { margin-bottom: 32px; }
+  h2 {
+    border-left: 4px solid var(--primary);
+    padding-left: 12px;
+    font-size: 22px;
+    margin: 0 0 16px;
+  }
+  h3 { font-size: 17px; margin: 0 0 8px; color: var(--primary-dark); }
+
+  /* 卡片栅格（景点卡 / 方案卡） */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 16px;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    transition: box-shadow 0.2s;
+  }
+  .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+  .card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+    background: #e5e7eb;
+  }
+  .card .body { padding: 14px 18px; }
+  .meta { color: var(--muted); font-size: 13px; margin-bottom: 8px; }
+  .stars { color: var(--accent); font-weight: 600; }
+
+  /* 表格（航班 / 每日行程 / 酒店 / 机酒预算） */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  th {
+    background: var(--primary-dark);
+    color: #fff;
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 14px;
+  }
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+
+  /* 地图 iframe */
+  iframe {
+    border: 0;
+    width: 100%;
+    height: 480px;
+    border-radius: var(--radius);
+  }
+  .map-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px;
+    margin-bottom: 8px;
+  }
+
+  /* 提示块 / 引用 */
+  .note {
+    background: #fef3c7;
+    border-left: 4px solid var(--accent);
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #78350f;
+    margin-bottom: 12px;
+  }
+  blockquote {
+    background: #eef9ff;
+    border-left: 4px solid var(--primary);
+    margin: 0 0 12px;
+    padding: 8px 14px;
+    color: #0c4a6e;
+    border-radius: 0 6px 6px 0;
+  }
+  ul.check { list-style: none; padding-left: 0; }
+  ul.check li { padding-left: 20px; position: relative; margin-bottom: 4px; }
+  ul.check li::before { content: "✓"; color: var(--primary); position: absolute; left: 0; font-weight: 700; }
+
+  .img-credit { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  img.broken { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); }
+
+  /* 方案卡内的总费用高亮 */
+  .plan-total { font-weight: 700; color: var(--primary-dark); }
+  .plan-title { font-size: 18px; margin-bottom: 6px; }
+
+  /* Leaflet 地图容器 */
+  .leaflet-map {
+    height: 520px;
+    width: 100%;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: #e5e7eb;
+  }
+  /* 自定义 marker（按日着色） */
+  .day-marker {
+    width: 32px;
+    height: 32px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    border: 2px solid #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .day-marker span { transform: rotate(45deg); }
+  /* 弹窗样式覆盖 */
+  .leaflet-popup-content { margin: 10px 14px; font-size: 13px; line-height: 1.5; }
+  .leaflet-popup-content h4 { margin: 0 0 4px; font-size: 14px; color: var(--primary-dark); }
+  /* 地图图例 */
+  .map-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+  }
+  .map-legend .lg-item { display: flex; align-items: center; gap: 6px; }
+  .map-legend .lg-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+
+  @media (max-width: 720px) {
+    .card { grid-template-columns: 1fr; }
+    .card img { height: 180px; }
+    iframe { height: 360px; }
+    .leaflet-map { height: 420px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>2026 国庆 · 杭州 - 香港 - 富国岛 - 香港 - 杭州（方案 C）</h1>
+  <div class="sub" id="gen-time"></div>
+</header>
+
+<main id="app"></main>
+
+<!-- ============================================================
+     模板：景点卡（用 <template> 克隆，不写死 DOM）
+     ============================================================ -->
+<template id="tpl-sight">
+  <div class="card">
+    <img alt="" onerror="this.classList.add('broken')">
+    <div class="body">
+      <h3></h3>
+      <div class="meta"></div>
+      <p class="desc"></p>
+      <div class="img-credit"></div>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-table">
+  <table>
+    <thead></thead>
+    <tbody></tbody>
+  </table>
+</template>
+
+<template id="tpl-plan">
+  <div class="card" style="grid-template-columns: 1fr;">
+    <div class="body">
+      <div class="plan-title"></div>
+      <div class="meta" style="margin-bottom: 12px;"></div>
+      <div class="plan-table"></div>
+    </div>
+  </div>
+</template>
+
+<!-- ============================================================
+     数据：所有内容在这里维护（JSON）。结构说明：
+       overview       行程概览 5 项
+       flights        航班表
+       hotels.hk      香港酒店表（转机过夜备选）
+       hotels.phuquoc 富国岛酒店表
+       hotelNote      酒店价格说明引用块
+       sights         景点数组（富国岛 + 香港，按顺序渲染）
+       dayPlan        每日行程（按城市分组：hk transit + phuquoc）
+       questions      待确认
+       plans          3 套机酒方案
+       notes          注意事项（数组，每项一段）
+       nextSteps      下一步（数组）
+     ============================================================ -->
+<script type="application/json" id="data">{
+  "overview": [
+    {
+      "label": "行程天数",
+      "value": "10 天（9/25 – 10/4）"
+    },
+    {
+      "label": "请假安排",
+      "value": "仅 9/28（周一）1 天"
+    },
+    {
+      "label": "出发地",
+      "value": "杭州萧山国际机场（HGH）"
+    },
+    {
+      "label": "路线",
+      "value": "杭州 → 香港（9/25-9/28）→ 富国岛（9/28-10/4）→ 杭州（10/4）"
+    },
+    {
+      "label": "停留分配",
+      "value": "香港 3 晚（9/25 + 9/26 + 9/27）+ 富国岛 5 晚（9/28-10/3）"
+    },
+    {
+      "label": "香港游玩策略",
+      "value": "9 月侧连续 4 天避开国庆拥堵；富国岛放国庆期间"
+    },
+    {
+      "label": "航班策略",
+      "value": "四段全部独立订票（不联程），每次到港需取行李入境；好处是香港可拆出 3 晚用于深度游"
+    }
+  ],
+  "schedule": [
+    [
+      "9/25",
+      "周五·中秋",
+      "杭州 → 香港（CX959 抵港 + 尖沙咀夜景 / 幻彩咏香江）"
+    ],
+    [
+      "9/26",
+      "周六·中秋",
+      "香港 第 2 天（太平山顶 + 庙街夜市）"
+    ],
+    [
+      "9/27",
+      "周日·中秋末",
+      "香港 第 3 天（昂坪 360 缆车 + 天坛大佛 + 大澳渔村）"
+    ],
+    [
+      "9/28",
+      "周一（请假）",
+      "香港 第 4 天（机动/购物）→ 16:10 飞富国岛 CX5596"
+    ],
+    [
+      "9/29",
+      "周二（请假）",
+      "富国岛 第 1 天（抵达 + Vinpearl 综合度假区适应）"
+    ],
+    [
+      "9/30",
+      "周三（请假）",
+      "富国岛 第 2 天（VinWonders 主题乐园）"
+    ],
+    [
+      "10/1",
+      "周四·国庆",
+      "富国岛 第 3 天（香岛跨海缆车 + Aquatopia）"
+    ],
+    [
+      "10/2",
+      "周五·国庆",
+      "富国岛 第 4 天（星星海滩 Sao + Kem Beach 长滩）"
+    ],
+    [
+      "10/3",
+      "周六·国庆",
+      "富国岛 第 5 天（Grand World + 富国夜市 / SPA）"
+    ],
+    [
+      "10/4",
+      "周日·国庆",
+      "富国岛 → 香港 → 杭州（CX5599 + CX962 独立两段）"
+    ]
+  ],
+  "flightStatus": "方案待讨论；MCP 暂无航班/酒店实时数据，价格均为参考价",
+  "flights": [
+    [
+      "航段",
+      "航班",
+      "日期",
+      "时段",
+      "备注"
+    ],
+    [
+      "杭州-香港",
+      "CX959（国泰）独立订票",
+      "9/25",
+      "HGH 11:25 → HKG 14:05",
+      "独立订票，行李提取入境；下午抵港，机场快线入市区（24 分钟到九龙）"
+    ],
+    [
+      "香港-富国岛",
+      "CX5596（国泰）独立订票",
+      "9/28",
+      "HKG 16:10 → PQC 18:05",
+      "9/28 上午可继续香港游，14:30 前回机场；行李自取重托"
+    ],
+    [
+      "富国岛-香港",
+      "CX5599（国泰）独立订票",
+      "10/4",
+      "PQC 10:40 → HKG 14:50",
+      "上午富国岛泳池 → 12:00 退房 → 14:00 前到机场；行李提取入境再出境"
+    ],
+    [
+      "香港-杭州",
+      "CX962（国泰）独立订票",
+      "10/4",
+      "HKG 16:00 → HGH 18:30",
+      "14:50 抵港后 1 小时 10 分转机，需重新入境 + 取行李 + 出境 + 重新托运"
+    ]
+  ],
+  "flightNote": "**全部为独立订票（不联程）**：每次到港 / 离港都需要提取行李、入境 / 出境、重新办登机。好处是**香港段可以拆出 3 晚 4 天**用于深度游。9/28 上午仍可在香港（CX5596 16:10 起飞，14:30 前回机场即可）；10/4 14:50 抵港后 70 分钟转 CX962 时间紧，建议富国岛退房后留充足 buffer。",
+  "hotelStatus": "方案讨论中；MCP 酒店工具未覆盖富国岛",
+  "hotelNote": "酒店价格 MCP 工具未覆盖香港/富国岛，以下价格为基于 2024-2025 公开渠道的经验估算。香港 3 晚酒店选机场快线可达的最省事，6 人建议开 3 间房。",
+  "hotels": {
+    "phuquoc": [
+      [
+        "酒店",
+        "星级",
+        "位置",
+        "5晚总价/间（参考）",
+        "推荐理由"
+      ],
+      [
+        "新世界富国岛度假村 New World Phu Quoc Resort",
+        "5星",
+        "北岛 Khem Beach（白沙滩）",
+        "¥6,200",
+        "万豪系品牌度假村，3 大泳池 + 私人沙滩 + 儿童俱乐部"
+      ],
+      [
+        "富国岛 JW 万豪翡翠湾 JW Marriott",
+        "5星",
+        "南岛 Bãi Kem（最美白沙滩）",
+        "¥8,500",
+        "Bill Bensley 设计，建筑博物馆级，亲子口碑第一"
+      ],
+      [
+        "Premier Village Phu Quoc 4 卧别墅",
+        "5星",
+        "南岛 Bãi Kem",
+        "¥10,500",
+        "全别墅带私人泳池，4 卧可容纳 6 人，无需分房"
+      ],
+      [
+        "（备选）Vinpearl Resort Phu Quoc",
+        "5星",
+        "北岛 Bãi Dài",
+        "¥5,000",
+        "Vin 综合度假区，VinWonders 住客免费入园"
+      ]
+    ],
+    "hk": [
+      [
+        "酒店",
+        "星级",
+        "位置",
+        "3晚总价/间（参考）",
+        "推荐理由"
+      ],
+      [
+        "香港丽思卡尔顿 The Ritz-Carlton Hong Kong",
+        "5星",
+        "九龙 ICC（机场快线九龙站上盖）",
+        "¥11,400",
+        "全球最高酒店之一，机场快线九龙站上盖，到机场 24 分钟"
+      ],
+      [
+        "香港 W 酒店 W Hong Kong",
+        "5星",
+        "九龙 Elements 上方（机场快线九龙站旁）",
+        "¥8,400",
+        "位置极佳，机场快线旁"
+      ],
+      [
+        "香港诺富特世纪酒店 Novotel Century",
+        "4星",
+        "湾仔（地铁直达机场快线）",
+        "¥3,600",
+        "性价比首选，3 间房 3 晚约 ¥10,800"
+      ],
+      [
+        "（备选）香港半岛酒店 The Peninsula",
+        "5星",
+        "九龙尖沙咀",
+        "¥13,500",
+        "百年传奇酒店，尖沙咀海滨步行 5 分钟"
+      ]
+    ]
+  },
+  "mapPhuQuoc": {
+    "center": [
+      10.2,
+      104.0
+    ],
+    "zoom": 10,
+    "note": "数据来源：OpenStreetMap 瓦片（Leaflet 渲染）。点击 marker 查看景点详情；彩色编号 = 对应日期。富国岛分南北：北岛（Khem Beach / Vinpearl）适合亲子，南岛（Bãi Kem / JW 万豪）是水质最佳区。"
+  },
+  "mapHK": {
+    "center": [
+      22.32,
+      114.17
+    ],
+    "zoom": 11,
+    "note": "数据来源：OpenStreetMap 瓦片（Leaflet 渲染）。香港段仅作转机过夜，市区游为可选机动。"
+  },
+  "sights": [
+    {
+      "id": "A",
+      "city": "phuquoc",
+      "stars": 4,
+      "name": "长滩 / Kem Beach Bãi Trường + Kem Beach",
+      "area": "富国岛南岸（主岛最长海滩，约 20km）",
+      "duration": "半天（傍晚最佳，可看日落）",
+      "tags": [
+        "phu,quoc,vietnam,beach,sunset"
+      ],
+      "desc": "富国岛最长海滩，沙白水清浪小。Kem Beach 段是公认富国岛水质最细腻的海滩之一，沙如面粉，浪小到几乎无声。比北岸 Vinpearl 区更野趣、人少。酒店若在北岛需打车 30-50 分钟（包车约 ¥300/天），一日游包接送。",
+      "lat": 10.14,
+      "lng": 103.985,
+      "day": 3,
+      "imagePath": "images/hk_phuquoc/P.jpg",
+      "imageCredit": {
+        "author": "Vivu Vietnam",
+        "license": "CC BY-SA 4.0",
+        "url": "https://commons.wikimedia.org/w/index.php?curid=185527343"
+      }
+    },
+    {
+      "id": "B",
+      "city": "phuquoc",
+      "stars": 5,
+      "name": "星星海滩 Starfish Beach (Bãi Sao)",
+      "area": "富国岛东南端（从 JW 万豪 15 分钟车程）",
+      "duration": "半天",
+      "tags": [
+        "phu,quoc,sao,beach,starfish"
+      ],
+      "desc": "富国岛水质最佳的海滩之一，能见度 15+ 米，沙子白如面粉、水深只到膝盖，是幼儿戏水的绝佳场所。退潮时海滩上有小海星。配 VinWonders 行程半日绰绰有余。",
+      "lat": 10.058,
+      "lng": 104.034,
+      "day": 3,
+      "imagePath": "images/hk_phuquoc/Q.jpg",
+      "imageCredit": {
+        "author": "Prince Roy",
+        "license": "CC BY 2.0",
+        "url": "https://commons.wikimedia.org/w/index.php?curid=109274420"
+      }
+    },
+    {
+      "id": "C",
+      "city": "phuquoc",
+      "stars": 5,
+      "name": "香岛跨海缆车 Hon Thom Cable Car",
+      "area": "富国岛南端 → 香岛（Aquatopia 水乐园）",
+      "duration": "半天到全天",
+      "tags": [
+        "phu,quoc,hon,thom,cable,car,aquatopia"
+      ],
+      "desc": "世界最长跨海缆车（7.9km），单程约 25 分钟，海面 360° 视野。终点香岛上有 Aquatopia 水乐园 + 餐饮街。一张门票涵盖缆车 + 水乐园，Vinpearl 系酒店住客可享套餐。",
+      "lat": 10.006,
+      "lng": 103.998,
+      "day": 5,
+      "imagePath": "images/hk_phuquoc/R.jpg",
+      "imageCredit": {
+        "author": "Vivu Vietnam",
+        "license": "CC BY-SA 4.0",
+        "url": "https://commons.wikimedia.org/wiki/File:Hon_Thom_Cable_Car_aerial_view_Phu_Quoc_Island_Vietnam.jpg"
+      }
+    },
+    {
+      "id": "D",
+      "city": "phuquoc",
+      "stars": 5,
+      "name": "VinWonders Phu Quoc 主题乐园",
+      "area": "富国岛北岸 Vinpearl 综合度假区",
+      "duration": "全天（09:30-21:30）",
+      "tags": [
+        "vin,wonders,phu,quoc,theme,park"
+      ],
+      "desc": "越南最大主题乐园，分室内 + 室外 + 水上三大园区，含过山车、4D 影院、童话城堡、夜光游行。Vinpearl 酒店住客可免费无限次入园。对标迪士尼但规模略小，幼儿友好。",
+      "lat": 10.334,
+      "lng": 103.851,
+      "day": 6,
+      "imagePath": "images/hk_phuquoc/S.jpg",
+      "imageCredit": {
+        "author": "Shang358",
+        "license": "CC0",
+        "url": "https://commons.wikimedia.org/w/index.php?curid=147228765"
+      }
+    },
+    {
+      "id": "E",
+      "city": "phuquoc",
+      "stars": 4,
+      "name": "Grand World 威尼斯小镇",
+      "area": "富国岛北岸 Vinpearl 综合度假区",
+      "duration": "半天（傍晚 + 夜景最佳）",
+      "tags": [
+        "grand,world,phu,quoc,venice"
+      ],
+      "desc": "Vin 集团造的威尼斯风情小镇，有运河、贡多拉、夜市、竹编鲤鱼。可免费游览，餐饮比 VinWonders 便宜。夜景灯光秀 19:00 / 21:00，拍照超出片。",
+      "lat": 10.33,
+      "lng": 103.857,
+      "day": 7,
+      "imagePath": "images/hk_phuquoc/T.jpg",
+      "imageCredit": {
+        "author": "松岡明芳",
+        "license": "CC BY-SA 4.0",
+        "url": "https://commons.wikimedia.org/w/index.php?curid=159335852"
+      }
+    },
+    {
+      "id": "F",
+      "city": "phuquoc",
+      "stars": 4,
+      "name": "富国夜市 + 渔港 Dinh Cậu Night Market",
+      "area": "富国镇 Dương Đông 渔港（南端 JW 万豪打车 50 分钟）",
+      "duration": "2-3 小时（晚上 18:00-23:00）",
+      "tags": [
+        "phu,quoc,night,market,dinh,cau,seafood"
+      ],
+      "desc": "富国岛最大的夜市，靠海边的渔港夜市。海鲜烧烤现场挑现场烤（一只大龙虾约 ¥150-200），椰子冻、春卷、芒果糯米饭。氛围接地气，比 VinWonders 更具越南本地特色。",
+      "lat": 10.227,
+      "lng": 103.957,
+      "day": 8,
+      "imagePath": "images/hk_phuquoc/U.jpg",
+      "imageCredit": {
+        "author": "FrogsLegs71",
+        "license": "CC BY-SA 3.0",
+        "url": "https://commons.wikimedia.org/w/index.php?curid=188567415"
+      }
+    },
+    {
+      "id": "G",
+      "city": "phuquoc",
+      "stars": 3,
+      "name": "Phú Quốc 国家公园 + Tranh Stream 瀑布",
+      "area": "富国岛中部山区（距南北酒店各 30-45 分钟）",
+      "duration": "半天",
+      "tags": [
+        "phu,quoc,national,park,stream,waterfall"
+      ],
+      "desc": "富国岛唯一的国家公园，红树林徒步 + 瀑布跳水。瀑布水量小（旱季几乎没水），不是必选项；适合喜欢自然散步的家庭，行程充裕时可去。",
+      "lat": 10.38,
+      "lng": 104.03,
+      "day": 8,
+      "imagePath": null
+    },
+    {
+      "id": "H",
+      "city": "phuquoc",
+      "stars": 4,
+      "name": "Cocoon Spa / Mỹ Lan SPA",
+      "area": "富国岛各大度假区",
+      "duration": "2 小时",
+      "tags": [
+        "phu,quoc,spa,vietnam"
+      ],
+      "desc": "越南传统草本热石 SPA，人均 ¥300-500。老人可选 60 分钟足底按摩（¥150 起），妈妈和姥姥可约双人 90 分钟全身。性价比高于泰国。",
+      "lat": 10.23,
+      "lng": 103.957,
+      "day": 8,
+      "imagePath": null
+    },
+    {
+      "id": "I",
+      "city": "hk",
+      "stars": 5,
+      "name": "太平山顶 + 凌霄阁 The Peak",
+      "area": "香港岛中部（地铁中环站 J2 → 山顶缆车花园道站）",
+      "duration": "3-4 小时（黄昏上山看夜景最佳）",
+      "tags": [
+        "hong,kong,the,peak,skyline,night"
+      ],
+      "desc": "世界三大夜景之一，山顶缆车有 130 年历史。凌霄阁摩天台 428m 俯览维港。傍晚上山可同时看日景 + 夜景（19:30 后开灯）。凌霄阁内杜莎夫人蜡像馆女儿会喜欢。可与尖沙咀串成 1 晚。",
+      "lat": 22.271,
+      "lng": 114.149,
+      "day": 2,
+      "imagePath": "images/hk_phuquoc/W.jpg",
+      "imageCredit": {
+        "author": "Diliff",
+        "license": "CC BY 3.0",
+        "url": "https://commons.wikimedia.org/w/index.php?curid=3963125"
+      }
+    },
+    {
+      "id": "J",
+      "city": "hk",
+      "stars": 5,
+      "name": "尖沙咀海滨 + 幻彩咏香江 Tsim Sha Tsui + Symphony of Lights",
+      "area": "九龙尖沙咀海滨（机场快线九龙站 → 地铁 5 分钟）",
+      "duration": "2-3 小时（晚上 19:30 起看灯光秀）",
+      "tags": [
+        "hong,kong,tsim,shsui,victoria,harbour,skyline"
+      ],
+      "desc": "转机过夜 1 晚的首选：晚上在尖沙咀海滨散步 + 看 20:00 幻彩咏香江（世界最大型灯光音乐秀）。维港两岸摩天楼灯光齐亮，老人小孩都会被震住。地铁机场快线九龙站直达，回酒店 10 分钟。",
+      "lat": 22.298,
+      "lng": 114.172,
+      "day": 1,
+      "imagePath": "images/hk_phuquoc/W.jpg",
+      "imageCredit": {
+        "author": "Diliff",
+        "license": "CC BY 3.0",
+        "url": "https://commons.wikimedia.org/w/index.php?curid=3963125"
+      }
+    },
+    {
+      "id": "K",
+      "city": "hk",
+      "stars": 4,
+      "name": "庙街夜市 + 油麻地 Temple Street Night Market",
+      "area": "九龙油麻地（地铁油麻地站 C 出口）",
+      "duration": "2-3 小时（晚上 19:00-22:00）",
+      "tags": [
+        "hong,kong,temple,street,night,market"
+      ],
+      "desc": "港片《食神》《古惑仔》取景地，露天夜市 + 粤式大排档 + 算命摊。煲仔饭、炒蟹、避风塘炒蟹、平价海鲜，老人小孩都能吃，比尖沙咀更接地气。可与尖沙咀串成半晚。",
+      "lat": 22.305,
+      "lng": 114.17,
+      "day": 2,
+      "imagePath": "images/hk_phuquoc/V.jpg",
+      "imageCredit": {
+        "author": "Diego Delso",
+        "license": "CC BY-SA 3.0",
+        "url": "https://commons.wikimedia.org/w/index.php?curid=29155082"
+      }
+    },
+    {
+      "id": "L",
+      "city": "hk",
+      "stars": 4,
+      "name": "昂坪 360 缆车 + 天坛大佛 Ngong Ping 360 + Tian Tan Buddha",
+      "area": "大屿山（地铁东涌站转缆车 25 分钟；紧邻机场）",
+      "duration": "半天",
+      "tags": [
+        "hong,kong,ngong,ping,buddha,cable,car"
+      ],
+      "desc": "水晶缆车 5.7km 跨海到大屿山昂坪，再走 5 分钟到天坛大佛（世界第二大户外青铜大佛）。缆车本身是亮点，老人小孩都喜爱。东涌站紧邻香港机场，可与返程飞机衔接。",
+      "lat": 22.254,
+      "lng": 113.905,
+      "day": 3,
+      "imagePath": null
+    },
+    {
+      "id": "M",
+      "city": "hk",
+      "stars": 4,
+      "name": "香港迪士尼乐园 Hong Kong Disneyland",
+      "area": "大屿山（地铁东涌线直达欣澳站换迪士尼线）",
+      "duration": "全天",
+      "tags": [
+        "hong,kong,disneyland"
+      ],
+      "desc": "全球最小迪士尼，但 IP 齐全（漫威、冰雪奇缘、米奇）。返程日清晨 10:50 飞机，时间不够全天玩；如想加迪士尼需把富国岛天数减 1 天。女儿 6 岁正值黄金年龄段。",
+      "lat": 22.313,
+      "lng": 114.044,
+      "day": 4,
+      "imagePath": null,
+      "imageCredit": null
+    },
+    {
+      "id": "N",
+      "city": "hk",
+      "stars": 4,
+      "name": "中环 + 半山扶梯 + 海港城 Central / Mid-levels Escalator",
+      "area": "香港岛中环（地铁中环站）",
+      "duration": "半天（10:00-14:00 逛街）",
+      "tags": [
+        "hong,kong,central,escalator,harbour,city"
+      ],
+      "desc": "中环是香港核心：半山扶梯（全球最长户外扶梯，《重庆森林》取景）+ 叮叮车总站 + 海港城购物。10/3 作为机动逛街日，老人可在酒店泡泳池 / 妈妈购物 / 女儿看叮叮车。",
+      "lat": 22.281,
+      "lng": 114.158,
+      "day": 9,
+      "imagePath": null
+    }
+  ],
+  "sightsExcludes": "10/4 返程日不安排景点；9/28 上午机动选 1 个（不能全做）。",
+  "dayPlan": {
+    "phuquoc": {
+      "title": "富国岛段（9/28–10/4，共 5 晚 7 天含 10/4 返程日飞离）",
+      "rows": [
+        [
+          "日期",
+          "主景点",
+          "辅助/晚上",
+          "区域",
+          "酒店"
+        ],
+        [
+          "9/28 周一（请假）",
+          "抵达 18:05 + 入住 + 酒店泳池/沙滩适应",
+          "酒店餐厅晚餐",
+          "若住北岛 Vinpearl：园区内；若住南岛 JW：海滩散步",
+          "新世界 / JW 万豪 / Premier Village"
+        ],
+        [
+          "9/29 周二（请假）",
+          "上午酒店泳池 → 下午 Vinpearl 度假区内机动",
+          "酒店内餐厅",
+          "Vinpearl 综合区",
+          "同 9/28"
+        ],
+        [
+          "9/30 周三（请假）",
+          "D. VinWonders 主题乐园（白天 09:30-18:00）",
+          "E. Grand World 夜景",
+          "Vinpearl 综合度假区",
+          "同 9/28"
+        ],
+        [
+          "10/1 周四·国庆",
+          "C. 香岛跨海缆车 Hon Thom + Aquatopia 水乐园（半日）",
+          "酒店泳池",
+          "南端 → 酒店",
+          "同 9/28"
+        ],
+        [
+          "10/2 周五·国庆",
+          "B. 星星海滩 Sao Beach（上午半日）",
+          "A. Kem Beach 长滩 / 长滩日落",
+          "南岸",
+          "同 9/28"
+        ],
+        [
+          "10/3 周六·国庆",
+          "F. 富国夜市 Dinh Cậu + SPA",
+          "酒店泳池",
+          "富国镇 Dương Đông",
+          "同 9/28"
+        ],
+        [
+          "10/4 周日·国庆",
+          "上午酒店泳池 → 12:00 退房 → 10:40 飞回香港",
+          "14:50 抵港 → 16:00 CX962 飞杭（行李重托）",
+          "酒店 → 富国岛机场",
+          "—（当天返程）"
+        ]
+      ],
+      "reasons": [
+        "富国岛 5 晚 7 天含 10/4 返程日：核心项目每天 1 个主项目",
+        "9/28 仅适应，9/29 Vinpearl 度假区机动（给老人小孩休整）",
+        "9/30 VinWonders + Grand World：一天玩两主题园（Vinpearl 酒店住客免费）",
+        "10/1 香岛缆车 + Aquatopia：标志性项目，半天搞定",
+        "10/2 海滩日：上午 Sao Beach + 傍晚 Kem Beach 长滩",
+        "10/3 夜市 + SPA：机动收尾，10/4 上午泳池后飞回"
+      ]
+    },
+    "hk": {
+      "title": "香港段（9/25–9/28，4 天 3 晚）",
+      "rows": [
+        [
+          "日期",
+          "主景点",
+          "辅助/晚上",
+          "区域",
+          "酒店"
+        ],
+        [
+          "9/25 周五·中秋",
+          "下午 14:05 抵港 → 机场快线入市区 → 入住",
+          "J. 尖沙咀海滨 + 幻彩咏香江 20:00",
+          "九龙尖沙咀",
+          "丽思 / W / 诺富特（住 3 晚）"
+        ],
+        [
+          "9/26 周六·中秋",
+          "上午 I. 太平山顶 + 凌霄阁摩天台",
+          "中午 K. 庙街夜市 / 油麻地大排档",
+          "中环 / 油麻地",
+          "同 9/25"
+        ],
+        [
+          "9/27 周日·中秋末",
+          "L. 昂坪 360 缆车 + 天坛大佛 + 大澳渔村（一日游）",
+          "晚上回市区酒店 SPA / 简餐",
+          "大屿山",
+          "同 9/25"
+        ],
+        [
+          "9/28 周一（请假）",
+          "上午 M. 香港迪士尼 OR 海洋公园 OR 中环/海港城购物",
+          "14:00 前回机场 → 16:10 飞富国岛",
+          "大屿山 / 香港岛 / 中环",
+          "—（当天飞富国岛）"
+        ]
+      ],
+      "reasons": [
+        "9 月侧 4 天连续 3 晚：避开国庆拥堵，香港景点人少 30-50%",
+        "9/25 抵港首晚：仅安排尖沙咀海滨 1 个轻量项目（看夜景），适应长途飞行",
+        "9/26 太平山顶 + 庙街：港片经典打卡 + 接地气大排档",
+        "9/27 昂坪大佛一日游：大屿山缆车 + 户外大佛 + 大澳渔村",
+        "9/28 机动：根据老人小孩体力选迪士尼 / 海洋公园 / 中环购物"
+      ]
+    }
+  },
+  "questions": [
+    "香港 3 晚选哪家？丽思（九龙 ICC 上盖）/ W（同一区域）/ 诺富特（湾仔，性价比）/ 半岛（尖沙咀海滨）",
+    "9/28 香港上午选 M. 香港迪士尼 / 海洋公园 / 中环购物？只能 1 选 1（半天时间）",
+    "富国岛 5 晚酒店选 Vinpearl（VinWonders 免费）/ JW 万豪（建筑顶级）/ Premier Village 别墅？",
+    "回程 10/4 14:50 抵港后 70 分钟转 CX962 时间紧，是否改 18:00 后航班或 CX962 改次日？"
+  ],
+  "plans": [
+    {
+      "name": "方案 A · 经济实惠",
+      "meta": "四段 CX 系列独立订票 + 富国岛 Vinpearl + 香港诺富特世纪",
+      "rows": [
+        [
+          "项目",
+          "单价",
+          "数量",
+          "小计（参考）"
+        ],
+        [
+          "机票（CX959+CX5596+CX5599+CX962）",
+          "待核实",
+          "6 人",
+          "约 ¥28,000–36,000"
+        ],
+        [
+          "富国岛 Vinpearl Resort 5 晚",
+          "¥5,000 / 5晚 / 间",
+          "3 间",
+          "¥15,000"
+        ],
+        [
+          "香港诺富特世纪 3 晚",
+          "¥3,600 / 3晚 / 间",
+          "3 间",
+          "¥10,800"
+        ],
+        [
+          "酒店小计",
+          "",
+          "",
+          "¥25,800"
+        ]
+      ]
+    },
+    {
+      "name": "方案 B · 均衡型",
+      "meta": "四段 CX 系列独立订票 + 富国岛新世界 + 香港 W 酒店",
+      "rows": [
+        [
+          "项目",
+          "单价",
+          "数量",
+          "小计（参考）"
+        ],
+        [
+          "机票（CX 系列独立订票）",
+          "待核实",
+          "6 人",
+          "约 ¥28,000–36,000"
+        ],
+        [
+          "富国岛新世界度假村 5 晚",
+          "¥6,200 / 5晚 / 间",
+          "3 间",
+          "¥18,600"
+        ],
+        [
+          "香港 W 酒店 3 晚",
+          "¥8,400 / 3晚 / 间",
+          "3 间",
+          "¥25,200"
+        ],
+        [
+          "酒店小计",
+          "",
+          "",
+          "¥43,800"
+        ]
+      ]
+    },
+    {
+      "name": "方案 C · 品质型",
+      "meta": "四段 CX 系列独立订票 + 富国岛 Premier Village 别墅 + 香港丽思",
+      "rows": [
+        [
+          "项目",
+          "单价",
+          "数量",
+          "小计（参考）"
+        ],
+        [
+          "机票（CX 系列独立订票）",
+          "待核实",
+          "6 人",
+          "约 ¥28,000–36,000"
+        ],
+        [
+          "Premier Village 4 卧泳池别墅 5 晚",
+          "¥10,500 / 5晚 / 栋",
+          "1 栋（容纳 6 人）",
+          "¥10,500"
+        ],
+        [
+          "香港丽思卡尔顿 3 晚",
+          "¥11,400 / 3晚 / 间",
+          "3 间",
+          "¥34,200"
+        ],
+        [
+          "酒店小计",
+          "",
+          "",
+          "¥44,700"
+        ]
+      ]
+    }
+  ],
+  "plansNote": [
+    "机票价格 MCP 工具暂未返回这四个航班号的实时报价，机票金额需在港航/国泰/香港快运官网或 OTA 平台实时核实",
+    "酒店价格 MCP 工具未返回富国岛和香港的报价，单价为基于 2024-2025 公开渠道的经验值，订房前需在 Booking / Agoda / 官网重新核实",
+    "6 人 3 间房：Premier Village 别墅 1 栋 4 卧可容纳 6 人（C 方案省一间）；女儿与父母同住无需加床",
+    "房型按每房 2 成人计，如有儿童价格差异需另行确认"
+  ],
+  "notes": [
+    "国泰 CX 系列四段独立订票（不联程）：每次到港 / 离港都需提取行李、入境 / 出境、重新办登机和托运。好处是香港可拆出 3 晚用于深度游",
+    "签证：方案必须确保护照有效期 > 6 个月；香港需港澳通行证 + 有效签注；越南实行电子签（e-visa），出发前 1 周在线申请，约 25 美元/人",
+    "时差：富国岛比香港慢 1 小时（UTC+7），比杭州慢 1 小时；电压 220V / 越南插座为德标两圆脚",
+    "货币：富国岛主要收越南盾（VND），1 元 ≈ 3500 VND；备 200-300 元人民币等值越南盾零钱",
+    "气候：富国岛 9 月底处于雨季尾声，10 月初阵雨多为 30 分钟；带防雨罩和速干衣",
+    "机票价格：上述 CX 系列航班暂未取得 MCP 实时报价，需在国泰官网或 OTA 平台实时核实",
+    "酒店价格：MCP 酒店工具未覆盖富国岛和香港，单价为经验值，下单前需在 Booking / Agoda / 官网再次核实",
+    "国庆假期（10/1-10/7）富国岛游客略增但比国内景点好；香港景点人会多 30-50%，故把香港放 9 月侧"
+  ],
+  "nextSteps": [
+    "用户确认机酒方案后，分 4 段独立预订机票（国泰官网或 OTA）",
+    "办理越南电子签（e-visa，提前 1 周申请）",
+    "确保护照+港澳通行证+签注有效期 > 6 个月",
+    "提前 1-2 周购买迪士尼/海洋公园/昂坪 360 缆车电子票"
+  ],
+  "dayRoutes": {
+    "phuquoc": [
+      {
+        "day": 4,
+        "date": "9/29 周二",
+        "sights": []
+      },
+      {
+        "day": 5,
+        "date": "9/30 周三",
+        "sights": [
+          "D",
+          "E"
+        ]
+      },
+      {
+        "day": 6,
+        "date": "10/1 周四",
+        "sights": [
+          "C"
+        ]
+      },
+      {
+        "day": 7,
+        "date": "10/2 周五",
+        "sights": [
+          "B",
+          "A"
+        ]
+      },
+      {
+        "day": 8,
+        "date": "10/3 周六",
+        "sights": [
+          "F"
+        ]
+      }
+    ],
+    "hk": [
+      {
+        "day": 1,
+        "date": "9/25 周五",
+        "sights": [
+          "J"
+        ]
+      },
+      {
+        "day": 2,
+        "date": "9/26 周六",
+        "sights": [
+          "I",
+          "K"
+        ]
+      },
+      {
+        "day": 3,
+        "date": "9/27 周日",
+        "sights": [
+          "L"
+        ]
+      },
+      {
+        "day": 4,
+        "date": "9/28 周一",
+        "sights": [
+          "M",
+          "N"
+        ]
+      }
+    ]
+  },
+  "dayColors": [
+    {
+      "id": 1,
+      "color": "#e74c3c",
+      "label": "9/25 周五·中秋 · 抵港+尖沙咀夜景"
+    },
+    {
+      "id": 2,
+      "color": "#e67e22",
+      "label": "9/26 周六·中秋 · 太平山顶+庙街"
+    },
+    {
+      "id": 3,
+      "color": "#f1c40f",
+      "label": "9/27 周日 · 昂坪大佛+大澳"
+    },
+    {
+      "id": 4,
+      "color": "#27ae60",
+      "label": "9/28 周一 · 机动/购物→飞富国岛"
+    },
+    {
+      "id": 5,
+      "color": "#16a085",
+      "label": "9/29 周二 · 抵达+Vinpearl适应"
+    },
+    {
+      "id": 6,
+      "color": "#2980b9",
+      "label": "9/30 周三 · VinWonders+Grand World"
+    },
+    {
+      "id": 7,
+      "color": "#8e44ad",
+      "label": "10/1 周四 · 香岛缆车+Aquatopia"
+    },
+    {
+      "id": 8,
+      "color": "#d35400",
+      "label": "10/2 周五 · Sao Beach+Kem Beach"
+    },
+    {
+      "id": 9,
+      "color": "#c0392b",
+      "label": "10/3 周六 · 夜市+SPA"
+    },
+    {
+      "id": 10,
+      "color": "#7f8c8d",
+      "label": "10/4 周日 · 飞回香港→飞杭"
+    }
+  ]
+}</script>
+
+<!-- ============================================================
+     渲染器：纯原生 JS，无依赖。从 JSON 数据生成全部 DOM。
+     维护原则：未来增删内容只改 #data；改样式只改 :root；
+              这段 JS 不需要动。
+     ============================================================ -->
+<script>
+(function () {
+  'use strict';
+  const app = document.getElementById('app');
+  let data;
+  try {
+    data = JSON.parse(document.getElementById('data').textContent);
+  } catch (err) {
+    app.innerHTML =
+      '<section><h2>数据加载失败</h2>' +
+      '<div class="note"><strong>JSON 解析错误</strong>：' +
+      err.message + '<br><br>' +
+      '请打开 <code>#data</code> 脚本块检查引号、逗号、方括号是否成对。' +
+      '常见原因：描述中误用了英文双引号 " 而非中文弯引号 " "。</div></section>';
+    console.error(err);
+    return;
+  }
+
+  // 工具：从 <template> 克隆
+  function tpl(id) {
+    return document.getElementById(id).content.firstElementChild.cloneNode(true);
+  }
+  // 工具：插入 section（带 h2，可选前缀编号）
+  function section(title, num) {
+    const s = document.createElement('section');
+    const h = document.createElement('h2');
+    h.textContent = (num != null ? (num + '. ') : '') + title;
+    s.appendChild(h);
+    app.appendChild(s);
+    return s;
+  }
+  // 工具：把二维数组渲染成 table
+  function renderTable(rows, opts) {
+    const highlightLast = !(opts && opts.highlightLast === false);
+    const tbl = tpl('tpl-table');
+    const thead = tbl.querySelector('thead');
+    const tbody = tbl.querySelector('tbody');
+    const head = rows[0];
+    const headRow = document.createElement('tr');
+    head.forEach(c => {
+      const th = document.createElement('th');
+      th.textContent = c;
+      headRow.appendChild(th);
+    });
+    thead.appendChild(headRow);
+    rows.slice(1).forEach(r => {
+      const tr = document.createElement('tr');
+      r.forEach((c, idx) => {
+        const td = document.createElement('td');
+        td.textContent = c;
+        if (highlightLast && idx === r.length - 1) td.className = 'plan-total';
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    return tbl;
+  }
+
+  // 1) 行程概览
+  {
+    const s = section('行程概览', 1);
+    const ul = document.createElement('ul');
+    ul.className = 'check';
+    data.overview.forEach(o => {
+      const li = document.createElement('li');
+      li.innerHTML = '<strong>' + o.label + '</strong>：' + o.value;
+      ul.appendChild(li);
+    });
+    s.appendChild(ul);
+
+    const note = document.createElement('p');
+    note.style.color = 'var(--muted)';
+    note.style.fontSize = '14px';
+    note.style.marginTop = '8px';
+    note.textContent = '10 天日程明细：';
+    s.appendChild(note);
+    s.appendChild(renderTable([['日期', '星期', '安排']].concat(data.schedule), { highlightLast: false }));
+  }
+
+  // 2) 航班概览
+  {
+    const s = section('航班概览', 2);
+    const status = document.createElement('blockquote');
+    status.textContent = data.flightStatus;
+    s.appendChild(status);
+    s.appendChild(renderTable(data.flights, { highlightLast: false }));
+    const note = document.createElement('div');
+    note.className = 'note';
+    note.innerHTML = '<strong>航班说明</strong>：' + data.flightNote;
+    s.appendChild(note);
+  }
+
+  // 3) 酒店概览
+  {
+    const s = section('酒店概览', 3);
+    const status = document.createElement('blockquote');
+    status.textContent = data.hotelStatus;
+    s.appendChild(status);
+    const note = document.createElement('div');
+    note.className = 'note';
+    note.innerHTML = '<strong>价格说明</strong>：' + data.hotelNote;
+    s.appendChild(note);
+
+    const sub1 = document.createElement('h3');
+    sub1.textContent = '富国岛 7 晚（9/26-10/3）';
+    s.appendChild(sub1);
+    s.appendChild(renderTable(data.hotels.phuquoc, { highlightLast: false }));
+
+    const sub2 = document.createElement('h3');
+    sub2.style.marginTop = '20px';
+    sub2.textContent = '香港转机过夜（9/25 + 10/3 各 1 晚）';
+    s.appendChild(sub2);
+    s.appendChild(renderTable(data.hotels.hk, { highlightLast: false }));
+  }
+
+  // 4) 富国岛行程（含 4.1 行程规划 / 4.2 景点介绍）
+  {
+    const s = section('富国岛行程', 4);
+
+    // 4.1 行程规划
+    const h1 = document.createElement('h3');
+    h1.style.marginTop = '12px';
+    h1.textContent = '4.1 行程规划';
+    s.appendChild(h1);
+
+    // 行程地图（地理概览）
+    const mapIntro = document.createElement('p');
+    mapIntro.style.color = 'var(--muted)';
+    mapIntro.style.fontSize = '14px';
+    mapIntro.style.marginTop = '0';
+    mapIntro.textContent = '每日行程的地理分布（点击 marker 查看景点详情）：';
+    s.appendChild(mapIntro);
+    const div = document.createElement('div');
+    div.id = 'map-phuquoc';
+    div.className = 'leaflet-map';
+    s.appendChild(div);
+    const credit = document.createElement('p');
+    credit.className = 'img-credit';
+    credit.textContent = data.mapPhuQuoc.note;
+    s.appendChild(credit);
+    window.__initMaps = window.__initMaps || [];
+    window.__initMaps.push(() => renderMap('phuquoc', 'map-phuquoc', data.mapPhuQuoc, data.sights, data.dayColors, data.dayRoutes));
+
+    // 每日表
+    const pqPlan = data.dayPlan.phuquoc;
+    s.appendChild(renderTable(pqPlan.rows));
+    const r1 = document.createElement('div');
+    r1.style.marginTop = '8px';
+    r1.innerHTML = '<strong>地理分块理由</strong>：<ul>' +
+      pqPlan.reasons.map(x => '<li>' + x + '</li>').join('') + '</ul>';
+    s.appendChild(r1);
+
+    // 待确认
+    const qh = document.createElement('h3');
+    qh.style.marginTop = '20px';
+    qh.textContent = '待确认';
+    s.appendChild(qh);
+    const ol = document.createElement('ol');
+    data.questions.forEach(q => {
+      const li = document.createElement('li');
+      li.textContent = q;
+      ol.appendChild(li);
+    });
+    s.appendChild(ol);
+
+    // 4.2 景点介绍
+    const h2 = document.createElement('h3');
+    h2.style.marginTop = '24px';
+    h2.textContent = '4.2 景点介绍';
+    s.appendChild(h2);
+
+    // 景点卡片
+    data.sights.filter(x => x.city === 'phuquoc').forEach(sg => {
+      const c = tpl('tpl-sight');
+      const tags = (sg.tags || []).join(',');
+      const img = c.querySelector('img');
+      img.src = sg.imageData || sg.imagePath || ('https://loremflickr.com/640/400/' + tags);
+      img.addEventListener('error', function once() {
+        img.removeEventListener('error', once);
+        if (sg.imageData) {
+          img.src = sg.imagePath || ('https://loremflickr.com/640/400/' + tags);
+        }
+        img.classList.add('broken');
+      });
+      img.alt = sg.name;
+      c.querySelector('h3').innerHTML =
+        sg.id + '. ' + sg.name + ' <span class="stars">' + '⭐'.repeat(sg.stars) + '</span>';
+      c.querySelector('.meta').textContent = '📍 ' + sg.area + ' · 建议 ' + sg.duration;
+      c.querySelector('.desc').textContent = sg.desc;
+      if (sg.imagePath) {
+        const cred = sg.imageCredit || {};
+        const author = cred.author || 'Anonymous';
+        const license = cred.license || 'CC';
+        c.querySelector('.img-credit').textContent =
+          '图：' + author + ' · ' + license + ' · via Wikimedia Commons';
+      } else {
+        c.querySelector('.img-credit').textContent = '图：LoremFlickr（关键词 ' + tags + '）';
+      }
+      s.appendChild(c);
+    });
+  }
+
+  // 5) 香港转机行程
+  {
+    const s = section('香港转机行程', 5);
+
+    // 5.1 行程规划
+    const h1 = document.createElement('h3');
+    h1.style.marginTop = '12px';
+    h1.textContent = '5.1 行程规划';
+    s.appendChild(h1);
+
+    // 行程地图
+    const mapIntro = document.createElement('p');
+    mapIntro.style.color = 'var(--muted)';
+    mapIntro.style.fontSize = '14px';
+    mapIntro.style.marginTop = '0';
+    mapIntro.textContent = '香港段景点分布（点击 marker 查看详情）：';
+    s.appendChild(mapIntro);
+    const div = document.createElement('div');
+    div.id = 'map-hk';
+    div.className = 'leaflet-map';
+    s.appendChild(div);
+    const credit = document.createElement('p');
+    credit.className = 'img-credit';
+    credit.textContent = data.mapHK.note;
+    s.appendChild(credit);
+    window.__initMaps = window.__initMaps || [];
+    window.__initMaps.push(() => renderMap('hk', 'map-hk', data.mapHK, data.sights, data.dayColors, data.dayRoutes));
+
+    // 每日表
+    const hkPlan = data.dayPlan.hk;
+    s.appendChild(renderTable(hkPlan.rows));
+    const r1 = document.createElement('div');
+    r1.style.marginTop = '8px';
+    r1.innerHTML = '<strong>分块理由</strong>：<ul>' +
+      hkPlan.reasons.map(x => '<li>' + x + '</li>').join('') + '</ul>';
+    s.appendChild(r1);
+
+    // 不去提示
+    const excl = document.createElement('blockquote');
+    excl.textContent = data.sightsExcludes;
+    s.appendChild(excl);
+
+    // 5.2 景点介绍
+    const h2 = document.createElement('h3');
+    h2.style.marginTop = '24px';
+    h2.textContent = '5.2 香港景点介绍（备选 / 机动）';
+    s.appendChild(h2);
+
+    // 景点卡片
+    data.sights.filter(x => x.city === 'hk').forEach(sg => {
+      const c = tpl('tpl-sight');
+      const tags = (sg.tags || []).join(',');
+      const img = c.querySelector('img');
+      img.src = sg.imageData || sg.imagePath || ('https://loremflickr.com/640/400/' + tags);
+      img.addEventListener('error', function once() {
+        img.removeEventListener('error', once);
+        if (sg.imageData) {
+          img.src = sg.imagePath || ('https://loremflickr.com/640/400/' + tags);
+        }
+        img.classList.add('broken');
+      });
+      img.alt = sg.name;
+      c.querySelector('h3').innerHTML =
+        sg.id + '. ' + sg.name + ' <span class="stars">' + '⭐'.repeat(sg.stars) + '</span>';
+      c.querySelector('.meta').textContent = '📍 ' + sg.area + ' · 建议 ' + sg.duration;
+      c.querySelector('.desc').textContent = sg.desc;
+      if (sg.imagePath) {
+        const cred = sg.imageCredit || {};
+        const author = cred.author || 'Anonymous';
+        const license = cred.license || 'CC';
+        c.querySelector('.img-credit').textContent =
+          '图：' + author + ' · ' + license + ' · via Wikimedia Commons';
+      } else {
+        c.querySelector('.img-credit').textContent = '图：LoremFlickr（关键词 ' + tags + '）';
+      }
+      s.appendChild(c);
+    });
+  }
+
+  // 6) 行程预算
+  {
+    const s = section('行程预算', 6);
+    const note = document.createElement('div');
+    note.className = 'note';
+    note.innerHTML = '<strong>重要说明</strong>：<ol style="margin: 6px 0 0 18px; padding: 0;">' +
+      data.plansNote.map(x => '<li>' + x + '</li>').join('') + '</ol>';
+    s.appendChild(note);
+    data.plans.forEach(p => {
+      const card = tpl('tpl-plan');
+      card.querySelector('.plan-title').textContent = p.name;
+      card.querySelector('.meta').textContent = p.meta;
+      card.querySelector('.plan-table').appendChild(renderTable(p.rows));
+      s.appendChild(card);
+    });
+  }
+
+  // 7) 注意事项
+  {
+    const s = section('注意事项', 7);
+    const ul = document.createElement('ul');
+    data.notes.forEach(n => {
+      const li = document.createElement('li');
+      li.textContent = n;
+      ul.appendChild(li);
+    });
+    s.appendChild(ul);
+  }
+
+  // 8) 下一步
+  {
+    const s = section('下一步', 8);
+    const ol = document.createElement('ol');
+    data.nextSteps.forEach(n => {
+      const li = document.createElement('li');
+      li.textContent = n;
+      ol.appendChild(li);
+    });
+    s.appendChild(ol);
+  }
+
+  // 生成时间
+  document.getElementById('gen-time').textContent =
+    '统一维护版（HTML 唯一源） · 最后更新：' + new Date().toISOString().slice(0, 10);
+
+  // 触发 Leaflet 地图初始化（DOM 已挂载）
+  (window.__initMaps || []).forEach(fn => fn());
+
+  /**
+   * Leaflet 地图渲染：
+   *   - 多 marker（每日编号+按日着色）
+   *   - 弹窗（景点名 + 推荐指数 + 区域）
+   *   - 每日路线连线（按 dayRoutes.sights 顺序）
+   *   - 自定义图例（按日色块）
+   */
+  function renderMap(city, divId, mapCfg, allSights, dayColors, dayRoutes) {
+    if (typeof L === 'undefined') {
+      document.getElementById(divId).innerHTML =
+        '<div style="padding:24px;color:#b91c1c;">Leaflet CDN 加载失败，请检查网络。</div>';
+      return;
+    }
+    const map = L.map(divId).setView(mapCfg.center, mapCfg.zoom);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    // 取本城市景点 + 当日路线涉及的景点
+    const citySights = allSights.filter(sg => sg.city === city && sg.lat && sg.lng);
+    const colorByDay = {};
+    dayColors.forEach(d => colorByDay[d.id] = d.color);
+
+    // marker
+    const markers = [];
+    citySights.forEach(sg => {
+      const color = colorByDay[sg.day] || '#666';
+      const icon = L.divIcon({
+        className: '',
+        html: '<div class="day-marker" style="background:' + color + ';"><span>' + sg.id + '</span></div>',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+      });
+      const m = L.marker([sg.lat, sg.lng], { icon: icon }).addTo(map);
+      m.bindPopup(
+        '<h4>' + sg.id + '. ' + sg.name + '</h4>' +
+        '<div style="color:' + color + ';font-weight:600;">' +
+        (dayColors.find(d => d.id === sg.day) || {}).label + '</div>' +
+        '<div style="color:#6b7280;font-size:12px;">📍 ' + sg.area + '</div>' +
+        '<div style="margin-top:4px;">⏱ ' + sg.duration + '</div>' +
+        '<div style="margin-top:4px;">推荐指数：<span style="color:#f59e0b;">' + '⭐'.repeat(sg.stars) + '</span></div>'
+      );
+      markers.push({ id: sg.id, latlng: [sg.lat, sg.lng], day: sg.day });
+    });
+
+    // 按日路线连线（仅连 ≥2 个景点的天）
+    const routes = (dayRoutes[city] || []).filter(d => d.sights.length >= 2);
+    routes.forEach(d => {
+      const pts = d.sights.map(sid => {
+        const m = markers.find(x => x.id === sid);
+        return m ? m.latlng : null;
+      }).filter(Boolean);
+      if (pts.length >= 2) {
+        const color = colorByDay[d.day] || '#666';
+        L.polyline(pts, {
+          color: color,
+          weight: 3,
+          opacity: 0.7,
+          dashArray: '6, 6'
+        }).addTo(map);
+      }
+    });
+
+    // 图例
+    const legend = document.createElement('div');
+    legend.className = 'map-legend';
+    const usedDays = new Set(citySights.map(sg => sg.day));
+    usedDays.forEach(dayId => {
+      const d = dayColors.find(x => x.id === dayId);
+      if (!d) return;
+      const item = document.createElement('div');
+      item.className = 'lg-item';
+      item.innerHTML = '<span class="lg-dot" style="background:' + d.color + ';"></span>' + d.label;
+      legend.appendChild(item);
+    });
+    document.getElementById(divId).parentNode.insertBefore(legend, document.getElementById(divId).nextSibling);
+  }
+})();
+</script>
+
+</body>
+</html>
