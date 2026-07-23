@@ -1239,112 +1239,25 @@
     s.appendChild(note);
 
     const sub1 = document.createElement('h3');
-    sub1.textContent = '富国岛 7 晚（9/26-10/3）';
+    sub1.textContent = '香港 3 晚（9/25-9/27）';
     s.appendChild(sub1);
-    s.appendChild(renderTable(data.hotels.phuquoc, { highlightLast: false }));
+    s.appendChild(renderTable(data.hotels.hk, { highlightLast: false }));
 
     const sub2 = document.createElement('h3');
     sub2.style.marginTop = '20px';
-    sub2.textContent = '香港转机过夜（9/25 + 10/3 各 1 晚）';
+    sub2.textContent = '富国岛 5 晚（9/28-10/3）';
     s.appendChild(sub2);
-    s.appendChild(renderTable(data.hotels.hk, { highlightLast: false }));
+    s.appendChild(renderTable(data.hotels.phuquoc, { highlightLast: false }));
   }
 
-  // 4) 富国岛行程（含 4.1 行程规划 / 4.2 景点介绍）
+  // 4) 香港行程（含 4.1 行程规划 / 4.2 景点介绍）
   {
-    const s = section('富国岛行程', 4);
+    const s = section('香港行程（9/25-9/28，4 天 3 晚）', 4);
 
     // 4.1 行程规划
     const h1 = document.createElement('h3');
     h1.style.marginTop = '12px';
     h1.textContent = '4.1 行程规划';
-    s.appendChild(h1);
-
-    // 行程地图（地理概览）
-    const mapIntro = document.createElement('p');
-    mapIntro.style.color = 'var(--muted)';
-    mapIntro.style.fontSize = '14px';
-    mapIntro.style.marginTop = '0';
-    mapIntro.textContent = '每日行程的地理分布（点击 marker 查看景点详情）：';
-    s.appendChild(mapIntro);
-    const div = document.createElement('div');
-    div.id = 'map-phuquoc';
-    div.className = 'leaflet-map';
-    s.appendChild(div);
-    const credit = document.createElement('p');
-    credit.className = 'img-credit';
-    credit.textContent = data.mapPhuQuoc.note;
-    s.appendChild(credit);
-    window.__initMaps = window.__initMaps || [];
-    window.__initMaps.push(() => renderMap('phuquoc', 'map-phuquoc', data.mapPhuQuoc, data.sights, data.dayColors, data.dayRoutes));
-
-    // 每日表
-    const pqPlan = data.dayPlan.phuquoc;
-    s.appendChild(renderTable(pqPlan.rows));
-    const r1 = document.createElement('div');
-    r1.style.marginTop = '8px';
-    r1.innerHTML = '<strong>地理分块理由</strong>：<ul>' +
-      pqPlan.reasons.map(x => '<li>' + x + '</li>').join('') + '</ul>';
-    s.appendChild(r1);
-
-    // 待确认
-    const qh = document.createElement('h3');
-    qh.style.marginTop = '20px';
-    qh.textContent = '待确认';
-    s.appendChild(qh);
-    const ol = document.createElement('ol');
-    data.questions.forEach(q => {
-      const li = document.createElement('li');
-      li.textContent = q;
-      ol.appendChild(li);
-    });
-    s.appendChild(ol);
-
-    // 4.2 景点介绍
-    const h2 = document.createElement('h3');
-    h2.style.marginTop = '24px';
-    h2.textContent = '4.2 景点介绍';
-    s.appendChild(h2);
-
-    // 景点卡片
-    data.sights.filter(x => x.city === 'phuquoc').forEach(sg => {
-      const c = tpl('tpl-sight');
-      const tags = (sg.tags || []).join(',');
-      const img = c.querySelector('img');
-      img.src = sg.imageData || sg.imagePath || ('https://loremflickr.com/640/400/' + tags);
-      img.addEventListener('error', function once() {
-        img.removeEventListener('error', once);
-        if (sg.imageData) {
-          img.src = sg.imagePath || ('https://loremflickr.com/640/400/' + tags);
-        }
-        img.classList.add('broken');
-      });
-      img.alt = sg.name;
-      c.querySelector('h3').innerHTML =
-        sg.id + '. ' + sg.name + ' <span class="stars">' + '⭐'.repeat(sg.stars) + '</span>';
-      c.querySelector('.meta').textContent = '📍 ' + sg.area + ' · 建议 ' + sg.duration;
-      c.querySelector('.desc').textContent = sg.desc;
-      if (sg.imagePath) {
-        const cred = sg.imageCredit || {};
-        const author = cred.author || 'Anonymous';
-        const license = cred.license || 'CC';
-        c.querySelector('.img-credit').textContent =
-          '图：' + author + ' · ' + license + ' · via Wikimedia Commons';
-      } else {
-        c.querySelector('.img-credit').textContent = '图：LoremFlickr（关键词 ' + tags + '）';
-      }
-      s.appendChild(c);
-    });
-  }
-
-  // 5) 香港转机行程
-  {
-    const s = section('香港转机行程', 5);
-
-    // 5.1 行程规划
-    const h1 = document.createElement('h3');
-    h1.style.marginTop = '12px';
-    h1.textContent = '5.1 行程规划';
     s.appendChild(h1);
 
     // 行程地图
@@ -1374,6 +1287,93 @@
       hkPlan.reasons.map(x => '<li>' + x + '</li>').join('') + '</ul>';
     s.appendChild(r1);
 
+    // 待确认
+    const qh = document.createElement('h3');
+    qh.style.marginTop = '20px';
+    qh.textContent = '待确认';
+    s.appendChild(qh);
+    const ol = document.createElement('ol');
+    data.questions.forEach(q => {
+      const li = document.createElement('li');
+      li.textContent = q;
+      ol.appendChild(li);
+    });
+    s.appendChild(ol);
+
+    // 4.2 景点介绍
+    const h2 = document.createElement('h3');
+    h2.style.marginTop = '24px';
+    h2.textContent = '4.2 景点介绍';
+    s.appendChild(h2);
+
+    // 景点卡片
+    data.sights.filter(x => x.city === 'hk').forEach(sg => {
+      const c = tpl('tpl-sight');
+      const tags = (sg.tags || []).join(',');
+      const img = c.querySelector('img');
+      img.src = sg.imageData || sg.imagePath || ('https://loremflickr.com/640/400/' + tags);
+      img.addEventListener('error', function once() {
+        img.removeEventListener('error', once);
+        if (sg.imageData) {
+          img.src = sg.imagePath || ('https://loremflickr.com/640/400/' + tags);
+        }
+        img.classList.add('broken');
+      });
+      img.alt = sg.name;
+      c.querySelector('h3').innerHTML =
+        sg.id + '. ' + sg.name + ' <span class="stars">' + '⭐'.repeat(sg.stars) + '</span>';
+      c.querySelector('.meta').textContent = '📍 ' + sg.area + ' · 建议 ' + sg.duration;
+      c.querySelector('.desc').textContent = sg.desc;
+      if (sg.imagePath) {
+        const cred = sg.imageCredit || {};
+        const author = cred.author || 'Anonymous';
+        const license = cred.license || 'CC';
+        c.querySelector('.img-credit').textContent =
+          '图：' + author + ' · ' + license + ' · via Wikimedia Commons';
+      } else {
+        c.querySelector('.img-credit').textContent = '图：LoremFlickr（关键词 ' + tags + '）';
+      }
+      s.appendChild(c);
+    });
+  }
+
+  // 5) 富国岛行程（含 5.1 行程规划 / 5.2 景点介绍）
+  {
+    const s = section('富国岛行程（9/28-10/3，6 天 5 晚）', 5);
+
+    // 5.1 行程规划
+    const h1 = document.createElement('h3');
+    h1.style.marginTop = '12px';
+    h1.textContent = '5.1 行程规划';
+    s.appendChild(h1);
+
+    // 行程地图（地理概览）
+    const mapIntro = document.createElement('p');
+    mapIntro.style.color = 'var(--muted)';
+    mapIntro.style.fontSize = '14px';
+    mapIntro.style.marginTop = '0';
+    mapIntro.textContent = '每日行程的地理分布（点击 marker 查看景点详情）：';
+    s.appendChild(mapIntro);
+    const div = document.createElement('div');
+    div.id = 'map-phuquoc';
+    div.className = 'leaflet-map';
+    s.appendChild(div);
+    const credit = document.createElement('p');
+    credit.className = 'img-credit';
+    credit.textContent = data.mapPhuQuoc.note;
+    s.appendChild(credit);
+    window.__initMaps = window.__initMaps || [];
+    window.__initMaps.push(() => renderMap('phuquoc', 'map-phuquoc', data.mapPhuQuoc, data.sights, data.dayColors, data.dayRoutes));
+
+    // 每日表
+    const pqPlan = data.dayPlan.phuquoc;
+    s.appendChild(renderTable(pqPlan.rows));
+    const r1 = document.createElement('div');
+    r1.style.marginTop = '8px';
+    r1.innerHTML = '<strong>地理分块理由</strong>：<ul>' +
+      pqPlan.reasons.map(x => '<li>' + x + '</li>').join('') + '</ul>';
+    s.appendChild(r1);
+
     // 不去提示
     const excl = document.createElement('blockquote');
     excl.textContent = data.sightsExcludes;
@@ -1382,11 +1382,11 @@
     // 5.2 景点介绍
     const h2 = document.createElement('h3');
     h2.style.marginTop = '24px';
-    h2.textContent = '5.2 香港景点介绍（备选 / 机动）';
+    h2.textContent = '5.2 景点介绍';
     s.appendChild(h2);
 
     // 景点卡片
-    data.sights.filter(x => x.city === 'hk').forEach(sg => {
+    data.sights.filter(x => x.city === 'phuquoc').forEach(sg => {
       const c = tpl('tpl-sight');
       const tags = (sg.tags || []).join(',');
       const img = c.querySelector('img');
