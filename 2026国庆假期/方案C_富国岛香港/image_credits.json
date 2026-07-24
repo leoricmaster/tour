@@ -1,80 +1,172 @@
 {
-  "P": {
-    "title": "Kem Beach aerial view Phu Quoc Island Vietnam.jpg",
-    "author": "see source",
+  "pq_A_a5b245c6.jpg": {
+    "title": "index.php?curid=185527343",
+    "author": "Vivu Vietnam",
     "license": "CC BY-SA 4.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=185527343"
+    "url": "https://commons.wikimedia.org/w/index.php?curid=185527343",
+    "sha1_8": "a5b245c6",
+    "sight_id": "A",
+    "city": "phuquoc",
+    "role": "main"
   },
-  "Q": {
-    "title": "Bai-sao-phu-quoc-tuonglamphotos.jpg",
+  "pq_B_78870269.jpg": {
+    "title": "index.php?curid=106631669",
     "author": "Trantuonglam",
     "license": "CC BY-SA 4.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=106631669"
+    "url": "https://commons.wikimedia.org/w/index.php?curid=106631669",
+    "sha1_8": "78870269",
+    "sight_id": "B",
+    "city": "phuquoc",
+    "role": "main"
   },
-  "R": {
-    "title": "Hon Thom cable car.jpg",
+  "pq_C_dc50c1ba.jpg": {
+    "title": "File:Hon_Thom_cable_car.jpg",
     "author": "see source",
     "license": "CC BY-SA 4.0",
-    "url": "https://commons.wikimedia.org/wiki/File:Hon_Thom_cable_car.jpg"
+    "url": "https://commons.wikimedia.org/wiki/File:Hon_Thom_cable_car.jpg",
+    "sha1_8": "dc50c1ba",
+    "sight_id": "C",
+    "city": "phuquoc",
+    "role": "main"
   },
-  "S": {
-    "title": "VinWonders Phu Quoc.jpg",
-    "author": "see source",
-    "license": "CC BY-SA 4.0",
-    "url": "https://commons.wikimedia.org/wiki/File:VinWonders_Phu_Quoc.jpg"
+  "pq_D_66546d7d.jpg": {
+    "title": "index.php?curid=147228765",
+    "author": "Shang358",
+    "license": "CC0",
+    "url": "https://commons.wikimedia.org/w/index.php?curid=147228765",
+    "sha1_8": "66546d7d",
+    "sight_id": "D",
+    "city": "phuquoc",
+    "role": "main"
   },
-  "T": {
-    "title": "2023-07-30 Grand World Phú Quốc DSCF2045.jpg",
+  "pq_M_97517507.jpg": {
+    "title": "index.php?curid=159335852",
     "author": "松岡明芳",
     "license": "CC BY-SA 4.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=159335852"
+    "url": "https://commons.wikimedia.org/w/index.php?curid=159335852",
+    "sha1_8": "97517507",
+    "sight_id": "M",
+    "city": "phuquoc",
+    "role": "main"
   },
-  "U": {
-    "title": "Cho Dem Phu Quoc - Welcome to Phu Quoc Night Market.jpg",
+  "pq_F_ed1afa1b.jpg": {
+    "title": "index.php?curid=188567415",
     "author": "FrogsLegs71",
     "license": "CC BY-SA 3.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=188567415"
+    "url": "https://commons.wikimedia.org/w/index.php?curid=188567415",
+    "sha1_8": "ed1afa1b",
+    "sight_id": "F",
+    "city": "phuquoc",
+    "role": "main"
   },
-  "V": {
-    "title": "Hong Kong Harbour Night 2019-06-11.jpg",
-    "author": "Benh LIEU SONG (Flickr)",
-    "license": "CC BY-SA 4.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=82284212"
-  },
-  "W": {
-    "title": "Hong Kong Skyline Restitch - Dec 2007.jpg",
-    "author": "Diliff",
-    "license": "CC BY 3.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=3963125"
-  },
-  "X": {
-    "title": "Ocean Park Hong Kong.jpg",
-    "author": "Exploringlife",
-    "license": "CC BY-SA 4.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=0"
-  },
-  "H": {
-    "title": "Phu Quoc beach Saigon Phu Quoc Resort and Spa (2).jpg",
+  "pq_H_04514cea.jpg": {
+    "title": "index.php?curid=178380673",
     "author": "Elmschrat",
     "license": "CC0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=178380673"
+    "url": "https://commons.wikimedia.org/w/index.php?curid=178380673",
+    "sha1_8": "04514cea",
+    "sight_id": "H",
+    "city": "phuquoc",
+    "role": "main"
   },
-  "J": {
-    "title": "Hong Kong Island Skyline 2009.jpg",
-    "author": "WiNG",
-    "license": "CC BY-SA 3.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=7081453"
+  "hk_I_82321310.jpg": {
+    "title": "index.php?curid=3963125",
+    "author": "Diliff",
+    "license": "CC BY 3.0",
+    "url": "https://commons.wikimedia.org/w/index.php?curid=3963125",
+    "sha1_8": "82321310",
+    "sight_id": "I",
+    "city": "hk",
+    "role": "main"
   },
-  "L": {
-    "title": "Ngong Ping 360 and Tian Tan Buddha.jpg",
+  "hk_J_be602af7.jpg": {
+    "title": "File:Hong_Kong,_A_Symphony_of_Lights_(1).jpg",
+    "author": "Krimuk2.0",
+    "license": "CC BY-SA 4.0",
+    "url": "https://commons.wikimedia.org/wiki/File:Hong_Kong,_A_Symphony_of_Lights_(1).jpg",
+    "sha1_8": "be602af7",
+    "sight_id": "J",
+    "city": "hk",
+    "role": "main"
+  },
+  "hk_J_7d98a280.jpg": {
+    "title": "File:2024-12-27_Avenue_of_Stars,_Hong_Kong.jpg",
+    "author": "Alexkom000",
+    "license": "CC BY 4.0",
+    "url": "https://commons.wikimedia.org/wiki/File:2024-12-27_Avenue_of_Stars,_Hong_Kong.jpg",
+    "sha1_8": "7d98a280",
+    "sight_id": "J",
+    "city": "hk",
+    "role": "extra"
+  },
+  "hk_L_7f0ce96f.jpg": {
+    "title": "index.php?curid=1467028",
     "author": "Charlotte1125 (Cara Chow)",
     "license": "CC BY-SA 2.5",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=1467028"
+    "url": "https://commons.wikimedia.org/w/index.php?curid=1467028",
+    "sha1_8": "7f0ce96f",
+    "sight_id": "L",
+    "city": "hk",
+    "role": "main"
   },
-  "N": {
-    "title": "Central-Mid-levels escalator.jpg",
+  "hk_N_bd28067b.jpg": {
+    "title": "index.php?curid=268379",
     "author": "K.C. Tang",
     "license": "CC BY-SA 3.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=268379"
+    "url": "https://commons.wikimedia.org/w/index.php?curid=268379",
+    "sha1_8": "bd28067b",
+    "sight_id": "N",
+    "city": "hk",
+    "role": "main"
+  },
+  "hk_O_16193d99.jpg": {
+    "title": "File:20201019_Castle_of_Magical_Dreams.jpg",
+    "author": "Ngchikit",
+    "license": "CC BY-SA 4.0",
+    "url": "https://commons.wikimedia.org/wiki/File:20201019_Castle_of_Magical_Dreams.jpg",
+    "sha1_8": "16193d99",
+    "sight_id": "O",
+    "city": "hk",
+    "role": "main"
+  },
+  "hk_P_089cd3e1.jpg": {
+    "title": "File:Grand_aquarium.jpg",
+    "author": "Mkckim",
+    "license": "CC BY-SA 3.0",
+    "url": "https://commons.wikimedia.org/wiki/File:Grand_aquarium.jpg",
+    "sha1_8": "089cd3e1",
+    "sight_id": "P",
+    "city": "hk",
+    "role": "main"
+  },
+  "hk_Q_50872e2d.jpg": {
+    "title": "File:Hong_Kong_Palace_Museum_2022.jpg",
+    "author": "xiquinhosilva",
+    "license": "CC BY 2.0",
+    "url": "https://commons.wikimedia.org/wiki/File:Hong_Kong_Palace_Museum_2022.jpg",
+    "sha1_8": "50872e2d",
+    "sight_id": "Q",
+    "city": "hk",
+    "role": "main"
+  },
+  "hk_R_0f9b3d74.jpg": {
+    "title": "File:HK_TST_Harbour_City_Ocean_Terminal_view_blue_Victoria_Harbour_night_Oct-2010.JPG",
+    "author": "Habact1015",
+    "license": "CC BY-SA 3.0",
+    "url": "https://commons.wikimedia.org/wiki/File:HK_TST_Harbour_City_Ocean_Terminal_view_blue_Victoria_Harbour_night_Oct-2010.JPG",
+    "sha1_8": "0f9b3d74",
+    "sight_id": "R",
+    "city": "hk",
+    "role": "main"
+  },
+  "hk_T_9f576628.jpg": {
+    "title": "File:Times_Square_Hong_Kong_Clock_Tower_2012.JPG",
+    "author": "Wpcpey",
+    "license": "CC BY 4.0",
+    "url": "https://commons.wikimedia.org/wiki/File:Times_Square_Hong_Kong_Clock_Tower_2012.JPG",
+    "sha1_8": "9f576628",
+    "sight_id": "T",
+    "city": "hk",
+    "role": "main"
   }
 }
