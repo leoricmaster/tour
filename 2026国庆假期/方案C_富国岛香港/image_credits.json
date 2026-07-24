@@ -168,5 +168,35 @@
     "sight_id": "T",
     "city": "hk",
     "role": "main"
+  },
+  "hk_U_7bbc9d84.jpg": {
+    "title": "File:Tai_Kwun_2021_03_11.jpg",
+    "author": "永愛所有小貓咪",
+    "license": "CC BY-SA 4.0",
+    "url": "https://commons.wikimedia.org/wiki/File:Tai_Kwun_2021_03_11.jpg",
+    "sha1_8": "7bbc9d84",
+    "sight_id": "U",
+    "city": "hk",
+    "role": "main"
+  },
+  "pq_V_76d8f9bf.jpg": {
+    "title": "File:Sun_World_Italian_Village_in_Phu_Quoc_Vietnam_-_Waterfountains.jpg",
+    "author": "FrogsLegs71",
+    "license": "CC BY-SA 3.0",
+    "url": "https://commons.wikimedia.org/wiki/File:Sun_World_Italian_Village_in_Phu_Quoc_Vietnam_-_Waterfountains.jpg",
+    "sha1_8": "76d8f9bf",
+    "sight_id": "V",
+    "city": "phuquoc",
+    "role": "main"
+  },
+  "pq_W_02419021.jpg": {
+    "title": "File:PQ_2022,_C%C3%B4ng_vi%C3%AAn_hoang_d%C3%A3_(Khu_ch%C3%A2u_Phi,_c%E1%BB%95ng_ng%C3%A0_voi)_(3).jpg",
+    "author": "Phương Huy",
+    "license": "CC BY-SA 4.0",
+    "url": "https://commons.wikimedia.org/wiki/File:PQ_2022,_C%C3%B4ng_vi%C3%AAn_hoang_d%C3%A3_(Khu_ch%C3%A2u_Phi,_c%E1%BB%95ng_ng%C3%A0_voi)_(3).jpg",
+    "sha1_8": "02419021",
+    "sight_id": "W",
+    "city": "phuquoc",
+    "role": "main"
   }
 }
