@@ -19,4 +19,4 @@
 # 分享版 HTML（base64 内嵌图片，体积大且每次发布都会变，不入版本控制）
 *_分享版.html
 *_share.html
-*_base64.html
+*_base64.html__pycache__/

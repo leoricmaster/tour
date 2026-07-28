@@ -7,9 +7,37 @@
 | 脚本 | 作用 | 输入 | 输出 |
 |---|---|---|---|
 | `fetch_image.py` | 从 Wikimedia Commons 下载景点图，按新规则命名 | 方案目录路径 + jobs.json（必填 `city`） | `images/<city>_<sid>_<sha1-8hex>.jpg` + 打印 image_credits.json 片段 |
-| `build_base64.py` | 内嵌 `images/*.jpg` 到 HTML，生成自包含单文件分享版 | 方案目录路径 + 可选 `--html` | 更新后的 HTML（含 `imageData` 字段） |
+| `validate_itinerary.py` | 校验 JSON 关系、图片、Hash、授权清单和 Base64 状态 | 方案目录路径 + `--html`；分享版加 `--share` | 校验报告 + 退出码 |
+| `regress_itinerary.py` | 对比渲染器结构不变量与 `baseline.json` | 方案目录路径 + `--html`；分享版加 `--share` | 校验报告 + 退出码 |
+| `build_base64.py` | 清除历史 Base64 后重新内嵌全部图片，生成单文件分享版 | 方案目录路径 + `--html` + `--output` | 独立的分享版 HTML |
 
 `fetch_image.py` 自动完成 `image_credits.json` 元数据生成所需的 info（author/license/title/url/sha1_8/sight_id/city）。
+
+## 标准校验与构建流程
+
+```bash
+# 1. 校验可维护源码：禁止包含 imageData
+python3 tools/validate_itinerary.py "<方案目录>" --html "<原文件>.html"
+python3 tools/regress_itinerary.py "<方案目录>" --html "<原文件>.html"
+
+# 2. 从原文件直接生成独立分享版，不覆盖源码
+python3 tools/build_base64.py "<方案目录>" \
+  --html "<原文件>.html" --output "<原文件>_分享版.html"
+
+# 3. 校验分享版：所有引用图片必须完整内嵌且内容一致
+python3 tools/validate_itinerary.py "<方案目录>" \
+  --html "<原文件>_分享版.html" --share
+python3 tools/regress_itinerary.py "<方案目录>" \
+  --html "<原文件>_分享版.html" --share
+```
+
+兼容旧流程：先复制原文件为 `_分享版.html`，再对分享版原地运行 `build_base64.py --html`。为防误覆盖，输出名不是 `_分享版.html`、`_share.html` 或 `_base64.html` 时工具会拒绝写入。
+
+职责划分：
+
+- `validate_itinerary.py` 负责静态数据 / 资源层：JSON、表格、路径、Hash、授权清单、Base64 状态
+- `regress_itinerary.py` 负责渲染器结构层：表、Tab、卡片、地图 div 等 DOM 不变量
+- `baseline.json` 集中存放渲染器应满足的计数基线；调整页面结构时同步更新
 
 ## 图片命名规则（与 sight id 解耦）
 
@@ -36,18 +64,26 @@ images/<city-prefix>_<sight-id>_<sha1-8hex>.jpg
 - 跨 city 同 sight id → `hk_A_<hash>.jpg` vs `pq_A_<hash>.jpg`，不撞名
 - 物理文件名 ↔ sight id 字母 完全解耦，**杜绝隐式耦合腐烂**
 
-### build_base64.py 的健康检查
+### 自动健康检查
 
-嵌入时强制校验每个 imagePath：
-1. 文件存在
-2. 文件名前缀匹配 sight.city（`hk_` 对 hk，`pq_` 对 phuquoc）
-3. 文件名里的 hash 与文件实际 SHA1 一致（防止改图但忘改文件名）
+`validate_itinerary.py` 会检查以下完整规则；`build_base64.py` 也会在内嵌前检查图片路径、城市前缀和 Hash：
 
-不一致会报警 + 退出码 1，**不静默通过**。
+1. `#data` JSON 可解析，必填数据结构存在
+2. 景点 ID 唯一，日期与每日路线引用一致
+3. 所有表格的列数一致
+4. 图片文件存在，且路径不能逃出方案目录
+5. 文件名前缀匹配 `sight.city`（`hk_` 对 hk，`pq_` 对 phuquoc）
+6. 文件名里的 Hash 与文件实际 SHA1 一致
+7. `image_credits.json` 与当前图片引用一一对应，关键元数据与 HTML 一致
+8. 原版不得包含 Base64；分享版必须完整内嵌且内容与物理图片一致
+
+任一硬错误都会退出码 1，**不静默通过**。未引用的物理图片只报警，不自动删除。
+
+`build_base64.py` 每次都会先删除旧的 `imageData` / `extraImageData`，再从物理图片重建，避免残留过期图片。
 
 ## CITY_PREFIX 常量
 
-`fetch_image.py` 顶部维护：
+`fetch_image.py`、`build_base64.py` 和 `validate_itinerary.py` 都维护同一组城市前缀：
 
 ```python
 CITY_PREFIX = {
@@ -58,7 +94,7 @@ CITY_PREFIX = {
 }
 ```
 
-新增城市时补一行即可。未知 city 降级到 `img` 前缀。
+新增城市时应同步补到三个脚本。`fetch_image.py` 对未知城市会暂用 `img` 前缀，但严格校验和分享版构建会要求先登记城市，避免产物带着临时前缀流出。
 
 ## image_credits.json 结构
 
@@ -66,7 +102,7 @@ CITY_PREFIX = {
 
 ```json
 {
-  "hk_J_be602af7.jpg": {
+  "images/hk_J_be602af7.jpg": {
     "title": "File:Hong_Kong,_A_Symphony_of_Lights_(1).jpg",
     "author": "Krimuk2.0",
     "license": "CC BY-SA 4.0",

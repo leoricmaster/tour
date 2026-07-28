@@ -59,12 +59,22 @@
     "city": "phuquoc",
     "role": "main"
   },
-  "images/pq_H_04514cea.jpg": {
-    "title": "index.php?curid=178380673",
-    "author": "Elmschrat",
-    "license": "CC0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=178380673",
-    "sha1_8": "04514cea",
+  "images/pq_G_ed2397dd.jpg": {
+    "title": "File:Phu quoc suoi tranh.jpg",
+    "author": "ntt",
+    "license": "CC BY-SA 3.0",
+    "url": "https://commons.wikimedia.org/wiki/File:Phu_quoc_suoi_tranh.jpg",
+    "sha1_8": "ed2397dd",
+    "sight_id": "G",
+    "city": "phuquoc",
+    "role": "main"
+  },
+  "images/pq_H_90fe4f9b.jpg": {
+    "title": "File:Hot Stone Massage at Witches Falls Cottages.jpg",
+    "author": "Daniela",
+    "license": "CC BY 2.0",
+    "url": "https://commons.wikimedia.org/wiki/File:Hot_Stone_Massage_at_Witches_Falls_Cottages.jpg",
+    "sha1_8": "90fe4f9b",
     "sight_id": "H",
     "city": "phuquoc",
     "role": "main"
@@ -89,15 +99,15 @@
     "city": "hk",
     "role": "main"
   },
-  "images/hk_J_7d98a280.jpg": {
-    "title": "File:2024-12-27_Avenue_of_Stars,_Hong_Kong.jpg",
-    "author": "Alexkom000",
-    "license": "CC BY 4.0",
-    "url": "https://commons.wikimedia.org/wiki/File:2024-12-27_Avenue_of_Stars,_Hong_Kong.jpg",
-    "sha1_8": "7d98a280",
-    "sight_id": "J",
+  "images/hk_K_95d41d8a.jpg": {
+    "title": "File:HK 佐敦 Jordan 廟街 Temple Street 夜市 market food stalls night December 2023 R12S 67.jpg",
+    "author": "ZhuWahDaSeeMcYanSze",
+    "license": "CC0",
+    "url": "https://commons.wikimedia.org/wiki/File:HK_%E4%BD%90%E6%95%A6_Jordan_%E5%BB%9F%E8%A1%97_Temple_Street_%E5%A4%9C%E5%B8%82_market_food_stalls_night_December_2023_R12S_67.jpg",
+    "sha1_8": "95d41d8a",
+    "sight_id": "K",
     "city": "hk",
-    "role": "extra"
+    "role": "main"
   },
   "images/hk_L_7f0ce96f.jpg": {
     "title": "index.php?curid=1467028",
@@ -106,16 +116,6 @@
     "url": "https://commons.wikimedia.org/w/index.php?curid=1467028",
     "sha1_8": "7f0ce96f",
     "sight_id": "L",
-    "city": "hk",
-    "role": "main"
-  },
-  "images/hk_N_bd28067b.jpg": {
-    "title": "index.php?curid=268379",
-    "author": "K.C. Tang",
-    "license": "CC BY-SA 3.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=268379",
-    "sha1_8": "bd28067b",
-    "sight_id": "N",
     "city": "hk",
     "role": "main"
   },
@@ -159,6 +159,16 @@
     "city": "hk",
     "role": "main"
   },
+  "images/hk_S_c9b8d0f0.jpg": {
+    "title": "File:Hong Kong Observation Wheel July 2018 - Bridge shot.jpg",
+    "author": "Wefk423",
+    "license": "CC BY-SA 4.0",
+    "url": "https://commons.wikimedia.org/wiki/File:Hong_Kong_Observation_Wheel_July_2018_-_Bridge_shot.jpg",
+    "sha1_8": "c9b8d0f0",
+    "sight_id": "S",
+    "city": "hk",
+    "role": "main"
+  },
   "images/hk_T_9f576628.jpg": {
     "title": "File:Times_Square_Hong_Kong_Clock_Tower_2012.JPG",
     "author": "Wpcpey",
@@ -169,12 +179,12 @@
     "city": "hk",
     "role": "main"
   },
-  "images/hk_U_7bbc9d84.jpg": {
-    "title": "File:Tai_Kwun_2021_03_11.jpg",
-    "author": "永愛所有小貓咪",
+  "images/hk_U_04501bfc.jpg": {
+    "title": "File:Tai Kwun Police Headquarters Block 201806.jpg",
+    "author": "Wpcpey",
     "license": "CC BY-SA 4.0",
-    "url": "https://commons.wikimedia.org/wiki/File:Tai_Kwun_2021_03_11.jpg",
-    "sha1_8": "7bbc9d84",
+    "url": "https://commons.wikimedia.org/wiki/File:Tai_Kwun_Police_Headquarters_Block_201806.jpg",
+    "sha1_8": "04501bfc",
     "sight_id": "U",
     "city": "hk",
     "role": "main"
@@ -196,6 +206,106 @@
     "url": "https://commons.wikimedia.org/wiki/File:PQ_2022,_C%C3%B4ng_vi%C3%AAn_hoang_d%C3%A3_(Khu_ch%C3%A2u_Phi,_c%E1%BB%95ng_ng%C3%A0_voi)_(3).jpg",
     "sha1_8": "02419021",
     "sight_id": "W",
+    "city": "phuquoc",
+    "role": "main"
+  },
+  "images/hk_X_3d519e06.jpg": {
+    "title": "File:Tsim Sha Tsui Ferry Pier.jpg",
+    "author": "Baycrest",
+    "license": "CC BY-SA 2.5",
+    "url": "https://commons.wikimedia.org/wiki/File:Tsim_Sha_Tsui_Ferry_Pier.jpg",
+    "sha1_8": "3d519e06",
+    "sight_id": "X",
+    "city": "hk",
+    "role": "main"
+  },
+  "images/hk_Y_ab0ffa2c.jpg": {
+    "title": "File:Repulse Bay palm trees.jpg",
+    "author": "Enochlau",
+    "license": "CC BY-SA 3.0",
+    "url": "https://commons.wikimedia.org/wiki/File:Repulse_Bay_palm_trees.jpg",
+    "sha1_8": "ab0ffa2c",
+    "sight_id": "Y",
+    "city": "hk",
+    "role": "main"
+  },
+  "images/hk_Z_72e624f8.jpg": {
+    "title": "File:Street Market in Stanley hong kong.JPG",
+    "author": "Fahad Faisal",
+    "license": "CC BY-SA 4.0",
+    "url": "https://commons.wikimedia.org/wiki/File:Street_Market_in_Stanley_hong_kong.JPG",
+    "sha1_8": "72e624f8",
+    "sight_id": "Z",
+    "city": "hk",
+    "role": "main"
+  },
+  "images/hk_AA_a2a854c0.jpg": {
+    "title": "File:Hong Kong China Wong-Tai-Sin-Temple-01.jpg",
+    "author": "CEphoto, Uwe Aranas",
+    "license": "CC BY-SA 3.0",
+    "url": "https://commons.wikimedia.org/wiki/File:Hong_Kong_China_Wong-Tai-Sin-Temple-01.jpg",
+    "sha1_8": "a2a854c0",
+    "sight_id": "AA",
+    "city": "hk",
+    "role": "main"
+  },
+  "images/hk_AB_35b65a8f.jpg": {
+    "title": "File:HK SSP 深水埗 Sham Shui Po 桂林街 Kweilin Street 街市 outdoor market March 2022 Px3 09.jpg",
+    "author": "KAM KONG FENG DIM",
+    "license": "CC BY-SA 4.0",
+    "url": "https://commons.wikimedia.org/wiki/File:HK_SSP_%E6%B7%B1%E6%B0%B4%E5%9F%97_Sham_Shui_Po_%E6%A1%82%E6%9E%97%E8%A1%97_Kweilin_Street_%E8%A1%97%E5%B8%82_outdoor_market_March_2022_Px3_09.jpg",
+    "sha1_8": "35b65a8f",
+    "sight_id": "AB",
+    "city": "hk",
+    "role": "main"
+  },
+  "images/hk_K2_d68ca685.jpg": {
+    "title": "File:Hong Kong night street 2.jpg",
+    "author": "Wilfredor",
+    "license": "CC0",
+    "url": "https://commons.wikimedia.org/wiki/File:Hong_Kong_night_street_2.jpg",
+    "sha1_8": "d68ca685",
+    "sight_id": "K2",
+    "city": "hk",
+    "role": "main"
+  },
+  "images/hk_L2_10a1670a.jpg": {
+    "title": "File:Tian Tan Buddha by Beria.jpg",
+    "author": "Béria Lima de Rodríguez",
+    "license": "CC BY-SA 3.0",
+    "url": "https://commons.wikimedia.org/wiki/File:Tian_Tan_Buddha_by_Beria.jpg",
+    "sha1_8": "10a1670a",
+    "sight_id": "L2",
+    "city": "hk",
+    "role": "main"
+  },
+  "images/hk_NM_bd28067b.jpg": {
+    "title": "File:Central-Mid-levels escalator.jpg",
+    "author": "K.C. Tang",
+    "license": "CC BY-SA 3.0",
+    "url": "https://commons.wikimedia.org/wiki/File:Central-Mid-levels_escalator.jpg",
+    "sha1_8": "bd28067b",
+    "sight_id": "NM",
+    "city": "hk",
+    "role": "main"
+  },
+  "images/pq_F2_fe7de740.jpg": {
+    "title": "File:Mũi Dinh Cậu, Phu Quoc, Kien Giang - panoramio.jpg",
+    "author": "trungydang",
+    "license": "CC BY 3.0",
+    "url": "https://commons.wikimedia.org/wiki/File:M%C5%A9i_Dinh_C%E1%BA%ADu,_Phu_Quoc,_Kien_Giang_-_panoramio.jpg",
+    "sha1_8": "fe7de740",
+    "sight_id": "F2",
+    "city": "phuquoc",
+    "role": "main"
+  },
+  "images/pq_AT_0ea37a81.jpg": {
+    "title": "File:Cong-vien-nuoc-aquatopia-5.jpg",
+    "author": "Vivu Vietnam",
+    "license": "CC BY-SA 4.0",
+    "url": "https://commons.wikimedia.org/wiki/File:Cong-vien-nuoc-aquatopia-5.jpg",
+    "sha1_8": "0ea37a81",
+    "sight_id": "AT",
     "city": "phuquoc",
     "role": "main"
   }

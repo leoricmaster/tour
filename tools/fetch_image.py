@@ -123,7 +123,11 @@ def main():
                 creds = json.loads(credits_path.read_text(encoding="utf-8"))
                 for fname, meta in creds.items():
                     if meta.get("sight_id") == sid and meta.get("city") == city:
-                        existing_for_sight = img_dir / fname
+                        candidate = pathlib.Path(fname)
+                        existing_for_sight = (
+                            base / candidate if candidate.parts and candidate.parts[0] == "images"
+                            else img_dir / candidate
+                        )
                         break
             except Exception:
                 pass
@@ -184,9 +188,10 @@ def main():
 
     # 顺便输出可写入 image_credits.json 的格式
     if results:
-        print("\n=== image_credits.json 片段（按新 filename 作 key） ===")
+        print("\n=== image_credits.json 片段（key 使用方案目录相对路径） ===")
         for r in results:
-            print(f'  "{r["filename"]}": {{"title": "{r["title"]}", "author": "{r["author"]}", "license": "{r["license"]}", "sha1_8": "{r["sha1_8"]}", "sight_id": "{r["id"]}", "city": "{r["city"]}"}},')
+            key = pathlib.Path("images") / r["filename"]
+            print(f'  "{key.as_posix()}": {{"title": "{r["title"]}", "author": "{r["author"]}", "license": "{r["license"]}", "sha1_8": "{r["sha1_8"]}", "sight_id": "{r["id"]}", "city": "{r["city"]}", "role": "main"}},')
 
 if __name__ == "__main__":
     main()
