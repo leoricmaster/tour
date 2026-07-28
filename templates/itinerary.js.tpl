@@ -77,8 +77,15 @@
     const headRow = document.createElement('tr');
     head.forEach(c => {
       const th = document.createElement('th');
-      th.textContent = c;
       th.setAttribute('scope', 'col');
+      if (c === '参考价格（人均）') {
+        const abbr = document.createElement('abbr');
+        abbr.title = '不含基建燃油费';
+        abbr.textContent = c;
+        th.appendChild(abbr);
+      } else {
+        th.textContent = c;
+      }
       headRow.appendChild(th);
     });
     thead.appendChild(headRow);

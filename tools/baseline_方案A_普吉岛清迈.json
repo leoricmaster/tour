@@ -22,8 +22,8 @@
       "phuket": 7,
       "chiangmai": 6
     },
-    "budget_rows": 0,
-    "notes_items": 5,
+    "budget_rows": 6,
+    "notes_items": 6,
     "image_credits_entries": 18
   },
   "rendered": {
@@ -31,11 +31,11 @@
     "tab_panels": 3,
     "map_divs": 2,
     "card_elements": 18,
-    "table_scroll_wrappers": 10,
-    "h2_in_overview": 8,
+    "table_scroll_wrappers": 7,
+    "h2_in_overview": 5,
     "h4_in_overview": 2,
     "h2_per_city": 2,
-    "h2_total": 12,
+    "h2_total": 9,
     "blockquotes_in_overview": 2,
     "note_blocks_in_overview": 1,
     "blockquotes_per_city": 1

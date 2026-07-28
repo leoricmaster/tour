@@ -79,6 +79,7 @@
     text-align: left;
     font-size: 14px;
   }
+  th abbr { cursor: help; border-bottom: 1px dotted rgba(255,255,255,0.6); text-decoration: none; }
   td {
     padding: 10px 12px;
     border-bottom: 1px solid var(--border);
