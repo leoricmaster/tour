@@ -1,0 +1,52 @@
+{
+  "_comment": "Regression baseline for scheme A (普吉岛清迈). Counts derived from renderer + #data. Per-scheme baseline because counts differ from scheme C.",
+  "data": {
+    "sights_total": 18,
+    "sights_by_city": {
+      "phuket": 11,
+      "chiangmai": 7
+    },
+    "cities": 2,
+    "day_colors": 10,
+    "day_routes_by_city": {
+      "phuket": 6,
+      "chiangmai": 4
+    },
+    "schedule_rows": 10,
+    "flights_rows": 4,
+    "hotels_by_city_rows": {
+      "phuket": 6,
+      "chiangmai": 5
+    },
+    "day_plan_by_city_rows": {
+      "phuket": 7,
+      "chiangmai": 6
+    },
+    "budget_rows": 0,
+    "notes_items": 5,
+    "image_credits_entries": 18
+  },
+  "rendered": {
+    "tab_buttons": 3,
+    "tab_panels": 3,
+    "map_divs": 2,
+    "card_elements": 18,
+    "table_scroll_wrappers": 10,
+    "h2_in_overview": 8,
+    "h4_in_overview": 2,
+    "h2_per_city": 2,
+    "h2_total": 12,
+    "blockquotes_in_overview": 2,
+    "note_blocks_in_overview": 1,
+    "blockquotes_per_city": 1
+  },
+  "share": {
+    "main_embedded": 18,
+    "extra_embedded": 0
+  },
+  "html_source_invariants": {
+    "image_data_present": false,
+    "inline_style_count_max": 10,
+    "uses_html_section_tags": true
+  }
+}

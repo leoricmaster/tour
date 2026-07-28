@@ -1,111 +1,187 @@
 {
-  "_note": "此文件仅作为 普吉岛清迈游.html 的图注参考副本（该 HTML 实际不读此文件，imageCredit 已内置于 #data.sights）。其他方案的图注请见 image_credits_hk_phuquoc.json（香港+富国岛）。",
-  "A": {
+  "_comment": "Schema: key = images/<filename>; value contains author/license/url/sha1_8/sight_id/city/role/title. Author/License sourced from existing credits (or Wikimedia API 2026-07-28 verification where available).",
+  "images/ph_A_942a0147.jpg": {
     "title": "Sunset at Karon Beach, Phuket, Thailand.JPG",
     "author": "Pather alexiy",
     "license": "CC BY-SA 3.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=29479328"
+    "url": "https://commons.wikimedia.org/w/index.php?curid=29479328",
+    "sha1_8": "942a0147",
+    "sight_id": "A",
+    "city": "phuket",
+    "role": "main"
   },
-  "B": {
+  "images/ph_B_0516d828.jpg": {
     "title": "Phuket Viewpoint.jpg",
     "author": "",
     "license": "CC BY-SA 3.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=2555"
+    "url": "https://commons.wikimedia.org/w/index.php?curid=2555",
+    "sha1_8": "0516d828",
+    "sight_id": "B",
+    "city": "phuket",
+    "role": "main"
   },
-  "C": {
+  "images/ph_C_5789828d.jpg": {
     "title": "Laem Phromthep in Phuket (5733622568).jpg",
     "author": "edwin.11",
     "license": "CC BY 2.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=24428068"
+    "url": "https://commons.wikimedia.org/w/index.php?curid=24428068",
+    "sha1_8": "5789828d",
+    "sight_id": "C",
+    "city": "phuket",
+    "role": "main"
   },
-  "D": {
+  "images/ph_D_8cb07f51.jpg": {
     "title": "Ko Tapu (James Bond) Island in Phang Nga Bay, Thailand.jpg",
     "author": "Vyaacheslav Argenberg",
     "license": "CC BY 4.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=23387978"
+    "url": "https://commons.wikimedia.org/w/index.php?curid=23387978",
+    "sha1_8": "8cb07f51",
+    "sight_id": "D",
+    "city": "phuket",
+    "role": "main",
+    "verification": "pending (curid 23387978 now resolves to a different image per Wikimedia 2026-07-28; existing metadata preserved)"
   },
-  "E": {
+  "images/ph_E_9a2b0090.jpg": {
     "title": "Phuket FantaSea (6548117563).jpg",
     "author": "Walter Lim from Singapore, Singapore",
     "license": "CC BY 2.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=82690245"
+    "url": "https://commons.wikimedia.org/w/index.php?curid=82690245",
+    "sha1_8": "9a2b0090",
+    "sight_id": "E",
+    "city": "phuket",
+    "role": "main"
   },
-  "F": {
+  "images/ph_F_001b363f.jpg": {
     "title": "P5020101 (52898556514).jpg",
     "author": "Luke Harold",
     "license": "CC0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=139387036"
+    "url": "https://commons.wikimedia.org/w/index.php?curid=139387036",
+    "sha1_8": "001b363f",
+    "sight_id": "F",
+    "city": "phuket",
+    "role": "main"
   },
-  "G": {
+  "images/ph_G_18872fe7.jpg": {
     "title": "Grand Pagoda - Wat Chalong.jpg",
     "author": "Edwin Lee\nderivative work: MrPanyGoff",
     "license": "CC BY 2.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=19822722"
+    "url": "https://commons.wikimedia.org/w/index.php?curid=19822722",
+    "sha1_8": "18872fe7",
+    "sight_id": "G",
+    "city": "phuket",
+    "role": "main"
   },
-  "H": {
+  "images/ph_H_d472b56b.jpg": {
     "title": "Patong Beach (1).jpg",
     "author": "Wolfgang Holzem",
     "license": "CC BY-SA 4.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=80273950"
+    "url": "https://commons.wikimedia.org/w/index.php?curid=80273950",
+    "sha1_8": "d472b56b",
+    "sight_id": "H",
+    "city": "phuket",
+    "role": "main"
   },
-  "I": {
-    "title": "20171105 Wat Chedi Luang Chiang Mai 9897 DxO.jpg",
-    "author": "Jakub Hałun",
-    "license": "CC BY-SA 4.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=71032415"
-  },
-  "J": {
-    "title": "ถนนนิมมานเหมินท์ อ.เมือง จ.เชียงใหม่ (1).jpg",
-    "author": "กสิณธร ราชโอรส",
-    "license": "CC BY-SA 4.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=138437130"
-  },
-  "K": {
-    "title": "Bull elephant Patara Elephant Farm.JPG",
-    "author": "Eyre1994100",
-    "license": "CC BY-SA 4.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=38825597"
-  },
-  "L": {
-    "title": "Doi Suthep Temple Chiang Mai Thailand 2.jpg",
-    "author": "Philip Nalangan",
-    "license": "CC BY 4.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=154829280"
-  },
-  "M": {
-    "title": "CHIANG MAI NIGHT BAZAAR THAILAND FEB 2012 (6869571256).jpg",
-    "author": "calflier001",
-    "license": "CC BY-SA 2.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=26363881"
-  },
-  "N": {
-    "title": "Chiang Mai University Library in 2025.jpg",
-    "author": "Athikhun.suw",
-    "license": "CC BY 4.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=158486979"
-  },
-  "O": {
-    "title": "Central Plaza Chiang Mai Airport.jpg",
-    "author": "Seashell",
-    "license": "FAL",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=18150198"
-  },
-  "P": {
+  "images/ph_P_62591f0c.jpg": {
     "title": "Big Buddha - Phuket, Thailand.JPG",
     "author": "Meissner24",
     "license": "CC BY-SA 3.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=14847606"
+    "url": "https://commons.wikimedia.org/w/index.php?curid=14847606",
+    "sha1_8": "62591f0c",
+    "sight_id": "P",
+    "city": "phuket",
+    "role": "main",
+    "verification": "pending (curid 14847606 now resolves to a different image per Wikimedia 2026-07-28; existing metadata preserved)"
   },
-  "Q": {
+  "images/ph_Q_43428190.jpg": {
     "title": "Thalang Road, Old Phuket Town.jpg",
     "author": "Christophe95",
     "license": "CC BY-SA 4.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=24157400"
+    "url": "https://commons.wikimedia.org/w/index.php?curid=24157400",
+    "sha1_8": "43428190",
+    "sight_id": "Q",
+    "city": "phuket",
+    "role": "main",
+    "verification": "pending (original data had curid=0 placeholder; curated URL preserved)"
   },
-  "R": {
+  "images/ph_R_9816f11e.jpg": {
     "title": "DZ6 2894 Night market stalls glow under colorful canopies as people browse and scooters are parked nearby in a tree-lined plaza.jpg",
     "author": "Pattananfoto",
     "license": "CC BY-SA 4.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=0"
+    "url": "https://commons.wikimedia.org/w/index.php?curid=0",
+    "sha1_8": "9816f11e",
+    "sight_id": "R",
+    "city": "phuket",
+    "role": "main",
+    "verification": "pending (curid=0 placeholder; curated URL needs re-verification)"
+  },
+  "images/cm_I_05060d04.jpg": {
+    "title": "20171105 Wat Chedi Luang Chiang Mai 9897 DxO.jpg",
+    "author": "Jakub Hałun",
+    "license": "CC BY-SA 4.0",
+    "url": "https://commons.wikimedia.org/w/index.php?curid=71032415",
+    "sha1_8": "05060d04",
+    "sight_id": "I",
+    "city": "chiangmai",
+    "role": "main"
+  },
+  "images/cm_J_cd6d4f72.jpg": {
+    "title": "ถนนนิมมานเหมินท์ อ.เมือง จ.เชียงใหม่ (1).jpg",
+    "author": "กสิณธร ราชโอรส",
+    "license": "CC BY-SA 4.0",
+    "url": "https://commons.wikimedia.org/w/index.php?curid=138437130",
+    "sha1_8": "cd6d4f72",
+    "sight_id": "J",
+    "city": "chiangmai",
+    "role": "main"
+  },
+  "images/cm_K_ef34f006.jpg": {
+    "title": "Bull elephant Patara Elephant Farm.JPG",
+    "author": "Eyre1994100",
+    "license": "CC BY-SA 4.0",
+    "url": "https://commons.wikimedia.org/w/index.php?curid=38825597",
+    "sha1_8": "ef34f006",
+    "sight_id": "K",
+    "city": "chiangmai",
+    "role": "main"
+  },
+  "images/cm_L_24dab4d4.jpg": {
+    "title": "Doi Suthep Temple Chiang Mai Thailand 2.jpg",
+    "author": "Philip Nalangan",
+    "license": "CC BY 4.0",
+    "url": "https://commons.wikimedia.org/w/index.php?curid=154829280",
+    "sha1_8": "24dab4d4",
+    "sight_id": "L",
+    "city": "chiangmai",
+    "role": "main"
+  },
+  "images/cm_M_3d967749.jpg": {
+    "title": "CHIANG MAI NIGHT BAZAAR THAILAND FEB 2012 (6869571256).jpg",
+    "author": "calflier001",
+    "license": "CC BY-SA 2.0",
+    "url": "https://commons.wikimedia.org/w/index.php?curid=26363881",
+    "sha1_8": "3d967749",
+    "sight_id": "M",
+    "city": "chiangmai",
+    "role": "main"
+  },
+  "images/cm_N_6ba7c465.jpg": {
+    "title": "Chiang Mai University Library in 2025.jpg",
+    "author": "Athikhun.suw",
+    "license": "CC BY 4.0",
+    "url": "https://commons.wikimedia.org/w/index.php?curid=158486979",
+    "sha1_8": "6ba7c465",
+    "sight_id": "N",
+    "city": "chiangmai",
+    "role": "main"
+  },
+  "images/cm_O_5b55f1f2.jpg": {
+    "title": "Central Plaza Chiang Mai Airport.jpg",
+    "author": "Seashell",
+    "license": "FAL",
+    "url": "https://commons.wikimedia.org/w/index.php?curid=18150198",
+    "sha1_8": "5b55f1f2",
+    "sight_id": "O",
+    "city": "chiangmai",
+    "role": "main"
   }
 }
