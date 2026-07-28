@@ -15,15 +15,15 @@
     "schedule_rows": 10,
     "flights_rows": 4,
     "hotels_by_city_rows": {
-      "phuket": 6,
+      "phuket": 7,
       "chiangmai": 5
     },
     "day_plan_by_city_rows": {
       "phuket": 7,
       "chiangmai": 6
     },
-    "budget_rows": 6,
-    "notes_items": 6,
+    "budget_rows": 7,
+    "notes_items": 9,
     "image_credits_entries": 18
   },
   "rendered": {
