@@ -16,7 +16,14 @@
 # 归档文件（已迁移到 .html 单一源后保留作历史参考，不参与版本控制）
 # *.md.archived
 
+# Python 缓存
+__pycache__/
+
 # 分享版 HTML（base64 内嵌图片，体积大且每次发布都会变，不入版本控制）
 *_分享版.html
 *_share.html
-*_base64.html__pycache__/
+*_base64.html
+
+# 主 HTML 是 data.json + templates/ 的构建产物（详见 AGENTS.md §3.0）。
+# 仍提交到 git 以便直接在 GitHub 渲染；修改请改 data.json 后跑 build_itinerary.py
+# 重新生成，不要直接编辑产物。

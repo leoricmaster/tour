@@ -9,9 +9,61 @@
 | `fetch_image.py` | 从 Wikimedia Commons 下载景点图，按新规则命名 | 方案目录路径 + jobs.json（必填 `city`） | `images/<city>_<sid>_<sha1-8hex>.jpg` + 打印 image_credits.json 片段 |
 | `validate_itinerary.py` | 校验 JSON 关系、图片、Hash、授权清单和 Base64 状态 | 方案目录路径 + `--html`；分享版加 `--share` | 校验报告 + 退出码 |
 | `regress_itinerary.py` | 对比渲染器结构不变量与基线 JSON（按方案自动选） | 方案目录路径 + `--html`；分享版加 `--share` | 校验报告 + 退出码 |
+| `build_itinerary.py` | 从 data.json + 共享模板生成方案主 HTML | 方案目录路径 | `<scheme>游.html` |
 | `build_base64.py` | 清除历史 Base64 后重新内嵌全部图片，生成单文件分享版 | 方案目录路径 + `--html` + `--output` | 独立的分享版 HTML |
 
 `fetch_image.py` 自动完成 `image_credits.json` 元数据生成所需的 info（author/license/title/url/sha1_8/sight_id/city）。
+
+## 模板与数据分离
+
+`templates/` 存放跨方案复用的骨架：
+
+```text
+templates/itinerary.html.tpl    # HTML 壳，含 {{TITLE}} / {{CSS}} / {{DATA}} / {{JS}} 占位
+templates/itinerary.css.tpl     # 共享 CSS（主题、卡片、表格、Tab、地图）
+templates/itinerary.js.tpl      # 共享 JS 渲染器（不包含 <script> 包装）
+```
+
+每个方案目录的数据与产物：
+
+```text
+方案X_<简述>/
+  data.json             # 数据源（必填、提交；包含 title、cities、sights、schedule…）
+  image_credits.json    # 图片授权清单（提交）
+  images/               # 物理图片（提交）
+  <原名>游.html         # 构建产物，gitignore，需 build_itinerary.py 生成
+  <原名>游_分享版.html  # 构建产物，gitignore，需 build_base64.py 生成
+```
+
+为什么不提交 HTML：它们是 data.json + 模板的合并结果，提交后易与数据脱钩、也不便 review。CI 拉下仓库后 build 一次即可。
+
+## 标准工作流
+
+```bash
+# 1. 修改数据（编辑 data.json）
+vi 方案X/data.json
+
+# 2. 构建主 HTML（可选步骤：validate / regress 也可直接对 data.json 读出后的结构跑）
+python3 tools/build_itinerary.py 方案X
+python3 tools/validate_itinerary.py 方案X --html 方案X/<原名>游.html
+python3 tools/regress_itinerary.py 方案X --html 方案X/<原名>游.html
+
+# 3. 构建分享版
+python3 tools/build_base64.py 方案X \
+  --html <原名>游.html --output <原名>游_分享版.html
+python3 tools/validate_itinerary.py 方案X \
+  --html <原名>游_分享版.html --share
+python3 tools/regress_itinerary.py 方案X \
+  --html <原名>游_分享版.html --share
+```
+
+职责划分：
+
+- `validate_itinerary.py` 负责静态数据 / 资源层：JSON、表格、路径、Hash、授权清单、Base64 状态
+- `regress_itinerary.py` 负责渲染器结构层：表、Tab、卡片、地图 div 等 DOM 不变量
+- `build_itinerary.py` 负责将 `data.json` 套上 `templates/` 生成产物 HTML
+- `build_base64.py` 负责为 HTML 嵌入图片、生成可独立转发的分享版
+- `baseline_<scheme>.json` 集中存放每个方案的渲染器计数基线
 
 ## 基线 JSON 命名
 
@@ -23,32 +75,6 @@ tools/baseline.json                # 兑底
 ```
 
 `--baseline` 可显式指定其他路径。调整页面结构 / 表格行数 / Tab 数时同步更新对应基线。
-
-## 标准校验与构建流程
-
-```bash
-# 1. 校验可维护源码：禁止包含 imageData
-python3 tools/validate_itinerary.py "<方案目录>" --html "<原文件>.html"
-python3 tools/regress_itinerary.py "<方案目录>" --html "<原文件>.html"
-
-# 2. 从原文件直接生成独立分享版，不覆盖源码
-python3 tools/build_base64.py "<方案目录>" \
-  --html "<原文件>.html" --output "<原文件>_分享版.html"
-
-# 3. 校验分享版：所有引用图片必须完整内嵌且内容一致
-python3 tools/validate_itinerary.py "<方案目录>" \
-  --html "<原文件>_分享版.html" --share
-python3 tools/regress_itinerary.py "<方案目录>" \
-  --html "<原文件>_分享版.html" --share
-```
-
-兼容旧流程：先复制原文件为 `_分享版.html`，再对分享版原地运行 `build_base64.py --html`。为防误覆盖，输出名不是 `_分享版.html`、`_share.html` 或 `_base64.html` 时工具会拒绝写入。
-
-职责划分：
-
-- `validate_itinerary.py` 负责静态数据 / 资源层：JSON、表格、路径、Hash、授权清单、Base64 状态
-- `regress_itinerary.py` 负责渲染器结构层：表、Tab、卡片、地图 div 等 DOM 不变量
-- `baseline.json` 集中存放渲染器应满足的计数基线；调整页面结构时同步更新
 
 ## 图片命名规则（与 sight id 解耦）
 

@@ -68,25 +68,67 @@
 
 ## 3. 文件管理约定
 
-### 3.1 分享版 HTML（重要）
+### 3.0 ⚠️ HTML 是构建产物，不是手编源
 
-`build_base64.py` 默认会**覆盖原 HTML**。本项目的约定是：
+```text
+templates/itinerary.{html,css,js}.tpl   ← 共享骨架（可手编）
+<scheme>/data.json                     ← 逐方案数据（可手编）
+<scheme>/<名>游.html                   ← 产物 ❌ 不要手编，改了会被覆盖
+<scheme>/<名>游_分享版.html            ← 产物 ❌ 不要手编
+```
 
-- ❌ **不要覆盖**原 HTML（`富国岛香港游.html`）
-- ✅ 用**单独文件**作为分享版（`富国岛香港游_分享版.html`）
-
-操作流程：
+主 HTML 是 `data.json` + `templates/` 的纯函数计算结果：
 
 ```bash
-# 1. 用 git 恢复原 HTML（如果 build_base64 误覆盖了）
-git checkout "方案目录/原文件.html"
-
-# 2. 复制原文件为分享版
-cp "方案目录/原文件.html" "方案目录/原文件_分享版.html"
-
-# 3. 在分享版上运行 build_base64
-python3 tools/build_base64.py "方案目录" --html "原文件_分享版.html"
+# 改 data.json 或 templates/ 后必须跑
+python3 tools/build_itinerary.py <方案目录>          # 重新生成主 HTML
+python3 tools/build_base64.py    <方案目录> \         # 生成分享版
+  --html <名>游.html --output <名>游_分享版.html
 ```
+
+**什么时候一定要跑 build**：
+
+- 改了 `data.json`（价格、行程、说明、景点元数据等）
+- 改了 `templates/`（CSS / JS / HTML 壳）
+- 从其他机器拉取后没看到本地 HTML
+- 调整 `image_credits.json`（图片路径虽然会被 build 读取，但分享版需要重建）
+
+**什么时候不需要跑 build**：
+
+- 只改 `images/` 里的图片文件本身
+- 调整 `tools/` 里的校验脚本
+- 修改文档（`README.md` / `AGENTS.md` / `tools/README.md`）
+
+**如果意外手改了 HTML，验证是否能重新生成**：
+
+```bash
+# 跑 build 后 git diff HTML。如果 diff 只反映 data.json / templates/ 的预期变化，说明上游源已是最新，手改被覆盖了。
+# 如果 diff 出现其他变化，要查清是手改了什么、是否要回写到上游。
+```
+
+### 3.1 模板 + data.json 数据/视图分离
+
+项目走的是 "data.json + templates/ → HTML 构建产物" 的工作流：
+
+```text
+templates/itinerary.html.tpl   # HTML 壳（{{TITLE}} {{CSS}} {{DATA}} {{JS}}）
+templates/itinerary.css.tpl    # 共享 CSS
+templates/itinerary.js.tpl     # 共享 JS 渲染器
+
+方案X/data.json                # 数据源（必填；含 title、cities、sights、dayPlan、dayColors…）
+方案X/<名>游.html              # 构建产物，gitignore
+方案X/<名>游_分享版.html       # 构建产物，gitignore
+```
+
+`data.json` 是源，HTML 是产物。不要在产物 HTML 里手改内容 — 下次 build 会被覆盖。
+
+### 3.2 旧“分享版会覆盖原 HTML”的说法已过时
+
+之前 `build_base64.py` 会覆盖原 HTML。项目现在的约定是：
+
+- ❌ 不再保留 `富国岛香港游.html` 作为源
+- ✅ 原 HTML 和 `_分享版.html` 都是产物（`build_itinerary.py` → `build_base64.py`）
+- ✅ 修改走 `data.json`；跑 build 重新生成
 
 `.gitignore` 已包含：
 
@@ -94,9 +136,10 @@ python3 tools/build_base64.py "方案目录" --html "原文件_分享版.html"
 *_分享版.html
 *_share.html
 *_base64.html
+2026国庆假期/方案*/*.html
 ```
 
-### 3.2 图片命名规则（与 sight id 解耦）
+### 3.3 图片命名规则（与 sight id 解耦）
 
 **新规则**（已迁移完成）：
 
@@ -153,20 +196,30 @@ images/<city-prefix>_<sight-id>_<sha1-8hex>.jpg
 ### 5.1 必用工具（跨方案复用）
 
 ```bash
-# 抓图（Wikimedia Commons）
+# 1. 抓图（Wikimedia Commons） — 写 data.json 后跑
 python3 tools/fetch_image.py <方案目录>
 
-# 生成 base64 内嵌的分享版
-python3 tools/build_base64.py <方案目录> --html <分享版文件名>
+# 2. 校验 data.json
+python3 tools/validate_itinerary.py <方案目录> --html <方案目录>/<名>游.html
+python3 tools/regress_itinerary.py  <方案目录> --html <方案目录>/<名>游.html
+
+# 3. 构建产物
+python3 tools/build_itinerary.py  <方案目录>        # 生成 <名>游.html
+python3 tools/build_base64.py     <方案目录> \
+  --html <名>游.html --output <名>游_分享版.html
 ```
 
-详细用法见 `tools/README.md`。
+详细用法见 `tools/README.md`。`build_base64.py` 默认拒绝覆盖原 HTML — 输出名必须以 `_分享版.html` / `_share.html` / `_base64.html` 结尾。
 
-### 5.2 build_base64.py 健康检查
+### 5.2 校验与构建职责
 
-- 缺失文件 → 必须修复，**不静默通过**
-- 文件名 hash 与实际 SHA1 不符 → 报警（说明有人改图没改文件名）
-- 文件名旧格式（无 city prefix）→ 报警，建议迁移
+- `validate_itinerary.py` — 静态层（数据/图片/Hash/授权清单/Base64 状态）
+- `regress_itinerary.py` — 渲染器结构层（Tab / 卡片 / 表格 / 地图 div 等 DOM 不变量）
+- `build_itinerary.py` — 从 `data.json` 套模板生成 HTML
+- `build_base64.py` — 为 HTML 嵌入图片、生成独立可转发的分享版
+- `baseline_<方案目录名>.json` — 每个方案的渲染器计数基线
+
+任何硬错误都会退出码 1，不静默通过。
 
 ---
 

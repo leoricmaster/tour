@@ -352,7 +352,7 @@ def validate(base: pathlib.Path, html_path: pathlib.Path, mode: str) -> Report:
         "schedule", "flights", "hotels", "sights", "dayPlan", "dayRoutes",
         "dayColors", "cities",
     )
-    optional_budget = {"budget", "plans", "notes", "nextSteps", "questions", "overview", "flightNote", "hotelNote", "plansNote", "flightStatus", "hotelStatus", "meta", "mapHK", "mapPhuQuoc", "sightsExcludes"}
+    optional_budget = {"budget", "plans", "notes", "nextSteps", "questions", "overview", "flightNote", "hotelNote", "plansNote", "flightStatus", "hotelStatus", "meta", "mapHK", "mapPhuQuoc", "sightsExcludes", "title"}
     missing = [key for key in required_top_level if key not in data]
     if missing:
         report.error(f"#data missing top-level fields: {', '.join(missing)}")
