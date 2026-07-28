@@ -8,10 +8,21 @@
 |---|---|---|---|
 | `fetch_image.py` | 从 Wikimedia Commons 下载景点图，按新规则命名 | 方案目录路径 + jobs.json（必填 `city`） | `images/<city>_<sid>_<sha1-8hex>.jpg` + 打印 image_credits.json 片段 |
 | `validate_itinerary.py` | 校验 JSON 关系、图片、Hash、授权清单和 Base64 状态 | 方案目录路径 + `--html`；分享版加 `--share` | 校验报告 + 退出码 |
-| `regress_itinerary.py` | 对比渲染器结构不变量与 `baseline.json` | 方案目录路径 + `--html`；分享版加 `--share` | 校验报告 + 退出码 |
+| `regress_itinerary.py` | 对比渲染器结构不变量与基线 JSON（按方案自动选） | 方案目录路径 + `--html`；分享版加 `--share` | 校验报告 + 退出码 |
 | `build_base64.py` | 清除历史 Base64 后重新内嵌全部图片，生成单文件分享版 | 方案目录路径 + `--html` + `--output` | 独立的分享版 HTML |
 
 `fetch_image.py` 自动完成 `image_credits.json` 元数据生成所需的 info（author/license/title/url/sha1_8/sight_id/city）。
+
+## 基线 JSON 命名
+
+回归基线按方案划分，工具自动选取：
+
+```text
+tools/baseline_<方案目录名>.json   # 优先，如 baseline_方案A_普吉岛清迈.json
+tools/baseline.json                # 兑底
+```
+
+`--baseline` 可显式指定其他路径。调整页面结构 / 表格行数 / Tab 数时同步更新对应基线。
 
 ## 标准校验与构建流程
 

@@ -2,13 +2,18 @@
 """Regression check for itinerary HTML renderer structure.
 
 This is a static structural check; it does not run JavaScript. It compares
-the data block and the HTML source against a baseline of renderer invariants
-(`tools/baseline.json`). For a behavioural check (pixel / DOM) use a real
-browser, e.g. Puppeteer or Playwright, in a separate script.
+the data block and the HTML source against a baseline of renderer invariants.
+For a behavioural check (pixel / DOM) use a real browser in a separate script.
 
 Usage:
   python3 tools/regress_itinerary.py <scheme_dir> --html <file.html>
   python3 tools/regress_itinerary.py <scheme_dir> --html <share.html> --share
+  python3 tools/regress_itinerary.py <scheme_dir> --html <file.html> --baseline <other.json>
+
+The baseline is resolved in this order:
+  1. --baseline CLI flag
+  2. tools/baseline_<scheme_dir_basename>.json (per-scheme)
+  3. tools/baseline.json (default)
 """
 
 from __future__ import annotations
@@ -46,7 +51,7 @@ def expect(report: Report, label: str, expected: Any, actual: Any) -> None:
     report.error(f"{label}: expected {expected!r}, got {actual!r}")
 
 
-def load_data(html_path: pathlib.Path, report: Report) -> dict[str, Any] | None:
+def load_data(html_path: pathlib.Path, report: Report) -> tuple[dict[str, Any], str] | None:
     html = html_path.read_text(encoding="utf-8")
     match = DATA_RE.search(html)
     if not match:
@@ -61,14 +66,8 @@ def load_data(html_path: pathlib.Path, report: Report) -> dict[str, Any] | None:
 
 
 def count_inline_styles(html: str) -> int:
-    """Count `style="..."` attributes that appear outside the JSON data block."""
     outside = re.sub(DATA_RE, "", html)
     return len(re.findall(r'\sstyle="', outside))
-
-
-def count_section_tags(html: str) -> int:
-    outside = re.sub(DATA_RE, "", html)
-    return len(re.findall(r"<section\b", outside))
 
 
 def check_data(report: Report, data: dict[str, Any], expected: dict[str, Any]) -> None:
@@ -95,8 +94,10 @@ def check_data(report: Report, data: dict[str, Any], expected: dict[str, Any]) -
     for cid, expected_count in expected.get("day_plan_by_city_rows", {}).items():
         plan = day_plan.get(cid) or {}
         expect(report, f"day_plan_by_city_rows[{cid}]", expected_count, len(plan.get("rows") or []))
-    expect(report, "budget_rows", expected["budget_rows"], len((data.get("budget") or {}).get("rows") or []))
-    expect(report, "notes_items", expected["notes_items"], len(data.get("notes") or []))
+    if "budget_rows" in expected:
+        expect(report, "budget_rows", expected["budget_rows"], len((data.get("budget") or {}).get("rows") or []))
+    if "notes_items" in expected:
+        expect(report, "notes_items", expected["notes_items"], len(data.get("notes") or []))
 
 
 def check_rendered(report: Report, data: dict[str, Any], expected: dict[str, Any]) -> None:
@@ -105,8 +106,9 @@ def check_rendered(report: Report, data: dict[str, Any], expected: dict[str, Any
     expect(report, "tab_panels", expected["tab_panels"], 1 + len(cities))
     expect(report, "map_divs", expected["map_divs"], len(cities))
     expect(report, "card_elements", expected["card_elements"], len(data.get("sights") or []))
-    # 1 schedule + 1 flights + len(cities) hotels + 1 budget + len(cities) dayPlan
     expected_wrappers = 3 + 2 * len(cities)
+    if data.get("plans") and not data.get("budget"):
+        expected_wrappers += len(data["plans"])
     expect(report, "table_scroll_wrappers", expected["table_scroll_wrappers"], expected_wrappers)
     h2_total = expected["h2_in_overview"] + expected["h2_per_city"] * len(cities)
     expect(report, "h2_total", expected["h2_total"], h2_total)
@@ -119,11 +121,6 @@ def check_html_invariants(report: Report, html: str, expected: dict[str, Any], m
         report.error(
             f"inline style count {inline} exceeds baseline max {expected['inline_style_count_max']}"
         )
-    if expected["uses_html_section_tags"] and count_section_tags(html) < 1:
-        # the source HTML uses <section> through renderer; count zero is acceptable
-        # because the page DOM is built at runtime. We only assert that the CSS
-        # still supports the class. This branch is informational.
-        pass
     if mode == "source" and expected["image_data_present"]:
         report.error("source HTML must not contain imageData fields")
 
@@ -135,11 +132,21 @@ def check_share(report: Report, data: dict[str, Any], expected: dict[str, Any]) 
     expect(report, "share.extra_embedded", expected["extra_embedded"], extra)
 
 
+def resolve_baseline(scheme_dir: pathlib.Path, override: str | None) -> pathlib.Path:
+    tools_dir = pathlib.Path(__file__).parent
+    if override:
+        return pathlib.Path(override)
+    per_scheme = tools_dir / f"baseline_{scheme_dir.name}.json"
+    if per_scheme.is_file():
+        return per_scheme
+    return tools_dir / "baseline.json"
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="校验行程 HTML 的渲染器回归基线")
     parser.add_argument("scheme_dir", help="方案目录")
     parser.add_argument("--html", required=True, help="目录内的 HTML 文件名")
-    parser.add_argument("--baseline", default=None, help="基线 JSON 路径（默认 tools/baseline.json）")
+    parser.add_argument("--baseline", default=None, help="基线 JSON 路径")
     parser.add_argument("--share", action="store_true", help="按 Base64 分享版规则校验")
     args = parser.parse_args()
 
@@ -149,7 +156,7 @@ def main() -> int:
         print(f"ERROR: HTML 不存在：{html_path}")
         return 1
 
-    baseline_path = pathlib.Path(args.baseline) if args.baseline else pathlib.Path(__file__).parent / "baseline.json"
+    baseline_path = resolve_baseline(base, args.baseline)
     try:
         baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:

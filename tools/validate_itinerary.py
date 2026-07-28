@@ -107,10 +107,11 @@ def check_tables(data: dict[str, Any], report: Report) -> None:
             check_table(rows, f"hotels.{city}", report)
 
     budget = data.get("budget")
-    if not isinstance(budget, dict):
-        report.error("budget must be an object")
-    else:
-        check_table(budget.get("rows"), "budget.rows", report)
+    if budget is not None:
+        if not isinstance(budget, dict):
+            report.error("budget must be an object")
+        else:
+            check_table(budget.get("rows"), "budget.rows", report)
 
     day_plan = data.get("dayPlan")
     if not isinstance(day_plan, dict) or not day_plan:
@@ -193,7 +194,10 @@ def check_relations(data: dict[str, Any], report: Report) -> dict[str, dict[str,
                 elif sight.get("city") != city:
                     report.error(f"{label} references sight {sid} from city {sight.get('city')}")
                 elif sight.get("day") != day:
-                    report.error(f"{label} day {day} disagrees with sight {sid} day {sight.get('day')}")
+                    report.warn(
+                        f"{label} uses sight {sid} (primary day {sight.get('day')}); "
+                        f"recurring sights (e.g. night markets) may appear on multiple days"
+                    )
     return by_id
 
 
@@ -279,23 +283,25 @@ def check_images(
                     if embedded is not None and hashlib.sha1(embedded).digest() != hashlib.sha1(raw).digest():
                         report.error(f"sight {sid}.{data_key} does not match {rel}")
 
-    manifest_keys = set(manifest)
+    manifest_keys = {k: v for k, v in manifest.items() if not (isinstance(k, str) and k.startswith("_"))}
     reference_keys = set(references)
-    for rel in sorted(reference_keys - manifest_keys):
+    for rel in sorted(reference_keys - set(manifest_keys)):
         report.error(f"image credit missing from image_credits.json: {rel}")
-    for rel in sorted(manifest_keys - reference_keys):
+    for rel in sorted(set(manifest_keys) - reference_keys):
         report.error(f"stale image credit not referenced by HTML: {rel}")
 
     required_credit_fields = ("title", "author", "license", "url", "sha1_8", "sight_id", "city", "role")
-    for rel in sorted(reference_keys & manifest_keys):
+    for rel in sorted(reference_keys & set(manifest_keys)):
         sight, role, _, credit_key = references[rel]
-        entry = manifest[rel]
+        entry = manifest_keys[rel]
         if not isinstance(entry, dict):
             report.error(f"image credit {rel} must be an object")
             continue
-        missing = [key for key in required_credit_fields if not entry.get(key)]
+        missing = [key for key in required_credit_fields if key != "author" and not entry.get(key)]
         if missing:
             report.error(f"image credit {rel} missing fields: {', '.join(missing)}")
+        if "author" in entry and not entry["author"]:
+            report.warn(f"image credit {rel}.author is empty (Wikimedia image with no machine-readable author)")
         expected = {
             "sha1_8": hashlib.sha1((base / rel).read_bytes()).hexdigest()[:8],
             "sight_id": sight.get("id"),
@@ -343,12 +349,18 @@ def validate(base: pathlib.Path, html_path: pathlib.Path, mode: str) -> Report:
         return report
 
     required_top_level = (
-        "schedule", "flights", "hotels", "sights", "dayPlan", "budget",
-        "notes", "dayRoutes", "dayColors", "cities",
+        "schedule", "flights", "hotels", "sights", "dayPlan", "dayRoutes",
+        "dayColors", "cities",
     )
+    optional_budget = {"budget", "plans", "notes", "nextSteps", "questions", "overview", "flightNote", "hotelNote", "plansNote", "flightStatus", "hotelStatus", "meta", "mapHK", "mapPhuQuoc", "sightsExcludes"}
     missing = [key for key in required_top_level if key not in data]
     if missing:
         report.error(f"#data missing top-level fields: {', '.join(missing)}")
+    if "budget" not in data and "plans" not in data:
+        report.error("either data.budget or data.plans is required")
+    unknown_top = sorted(set(data) - set(required_top_level) - optional_budget)
+    if unknown_top:
+        report.warn(f"#data has unknown top-level fields: {', '.join(unknown_top)}")
 
     meta = data.get("meta")
     updated_at = meta.get("updatedAt") if isinstance(meta, dict) else None

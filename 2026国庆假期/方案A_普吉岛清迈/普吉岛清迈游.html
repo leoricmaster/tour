@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>2026 国庆 · 普吉岛清迈游</title>
 
-<!-- Leaflet 地图库（CDN · 免费 · 业界旅游站标配） -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<!-- Leaflet 地图库（CDN · 国内静态资源 · 大陆可访问） -->
+<link rel="stylesheet" href="https://cdn.staticfile.net/leaflet/1.9.4/leaflet.min.css" crossorigin="">
+<script src="https://cdn.staticfile.net/leaflet/1.9.4/leaflet.min.js" crossorigin=""></script>
 <style>
   /* ============================================================
      主题与布局：所有视觉变量集中在 :root，便于未来换皮
@@ -45,9 +45,11 @@
     border-left: 4px solid var(--primary);
     padding-left: 12px;
     font-size: 22px;
-    margin: 0 0 16px;
+    margin: 24px 0 16px;
   }
+  section > h2:first-child { margin-top: 0; }
   h3 { font-size: 17px; margin: 0 0 8px; color: var(--primary-dark); }
+  h4 { font-size: 15px; margin: 0 0 8px; color: var(--text); font-weight: 600; }
 
   /* 卡片栅格（景点卡 / 方案卡） */
   .card {
@@ -96,21 +98,6 @@
   }
   tr:last-child td { border-bottom: none; }
 
-  /* 地图 iframe */
-  iframe {
-    border: 0;
-    width: 100%;
-    height: 480px;
-    border-radius: var(--radius);
-  }
-  .map-wrap {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 8px;
-    margin-bottom: 8px;
-  }
-
   /* 提示块 / 引用 */
   .note {
     background: #fef3c7;
@@ -134,11 +121,23 @@
   ul.check li::before { content: "✓"; color: var(--primary); position: absolute; left: 0; font-weight: 700; }
 
   .img-credit { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .map-intro { color: var(--muted); font-size: 14px; margin-top: 0; }
+  .section-spaced { margin-top: 16px; }
   img.broken { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); }
 
   /* 方案卡内的总费用高亮 */
   .plan-total { font-weight: 700; color: var(--primary-dark); }
-  .plan-title { font-size: 18px; margin-bottom: 6px; }
+
+  /* 计划卡（机酒方案 / 行程预算） */
+  .plan-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .plan-card .body { padding: 14px 18px; }
+  .plan-card .plan-title { font-size: 18px; margin-bottom: 6px; }
 
   /* Leaflet 地图容器 */
   .leaflet-map {
@@ -182,11 +181,50 @@
   .map-legend .lg-item { display: flex; align-items: center; gap: 6px; }
   .map-legend .lg-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
 
+  /* Tab 导航 */
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+    background: var(--card);
+    border-bottom: 2px solid var(--border);
+    padding: 0 8px;
+    margin: 0 0 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .tab-bar button {
+    background: transparent;
+    border: 0;
+    padding: 12px 18px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.15s, border-color 0.15s;
+    font-family: inherit;
+  }
+  .tab-bar button:hover { color: var(--primary-dark); }
+  .tab-bar button.active {
+    color: var(--primary-dark);
+    border-bottom-color: var(--primary);
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* 表格横向滚动容器（移动端友好） */
+  .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
   @media (max-width: 720px) {
     .card { grid-template-columns: 1fr; }
     .card img { height: 180px; }
-    iframe { height: 360px; }
     .leaflet-map { height: 420px; }
+    .tab-bar button { padding: 10px 12px; font-size: 14px; }
   }
 </style>
 </head>
@@ -221,33 +259,60 @@
   </table>
 </template>
 
-<template id="tpl-plan">
-  <div class="card" style="grid-template-columns: 1fr;">
-    <div class="body">
-      <div class="plan-title"></div>
-      <div class="meta" style="margin-bottom: 12px;"></div>
-      <div class="plan-table"></div>
-    </div>
-  </div>
-</template>
-
 <!-- ============================================================
      数据：所有内容在这里维护（JSON）。结构说明：
-       overview       行程概览 5 项
-       flights        航班表
-       hotels.phuket  普吉酒店表
-       hotels.chiangmai 清迈酒店表
-       hotelNote      酒店价格说明引用块
-       sights         景点数组（普吉 + 清迈，按顺序渲染）
+       meta.updatedAt  真实的最后维护日期
+       cities          城市配置（label/tabLabel/hotelHeading/map.{intro,credit,tile,maxZoom}/sightsExcludes）
+       overview        行程概览（数组，A 方案专属）
+       schedule        行程安排表
+       flights         航班表
+       flightStatus    航班状态引用块
+       hotelStatus     酒店状态引用块
+       hotelNote       酒店价格说明
+       hotels.phuket/chiangmai 酒店表
+       budget          单一汇总预算（与 plans 二选一）
+       plans           3 套机酒方案（与 budget 二选一）
+       plansNote       机酒方案说明（数组）
+       notes           注意事项（数组）
+       nextSteps       下一步（数组）
+       questions       待确认（数组）
+       sights          景点数组
        dayPlan.phuket/chiangmai 每日行程
-       planReason.phuket/chiangmai 地理分块理由
-       questions      待确认
-       plans          3 套机酒方案
-       notes          注意事项（数组，每项一段）
-       nextSteps      下一步（数组）
-       地图通过每段首张卡的 imageTags 自动生成
+       dayPlan.<city>.reasons  地理分块理由（数组，可选）
+       dayRoutes       每日路线
+       dayColors       每日配色
      ============================================================ -->
 <script type="application/json" id="data">{
+  "meta": {
+    "updatedAt": "2026-07-28"
+  },
+  "cities": [
+    {
+      "id": "phuket",
+      "label": "普吉岛",
+      "tabLabel": "普吉岛行程（9/25-9/30）",
+      "hotelHeading": "普吉岛 5 晚（9/25-9/30）",
+      "map": {
+        "intro": "每日行程的地理分布（点击 marker 查看景点详情）：",
+        "maxZoom": 13,
+        "tile": "osm-de",
+        "credit": "底图：© OpenStreetMap-DE / OSM contributors"
+      }
+    },
+    {
+      "id": "chiangmai",
+      "label": "清迈",
+      "tabLabel": "清迈行程（9/30-10/4）",
+      "hotelHeading": "清迈 4 晚（9/30-10/3）",
+      "map": {
+        "intro": "每日行程的地理分布（点击 marker 查看景点详情）：",
+        "maxZoom": 13,
+        "tile": "osm-de",
+        "credit": "底图：© OpenStreetMap-DE / OSM contributors"
+      },
+      "sightsExcludes": "不去拜县（Pai 单程 3.5 小时盘山路，老人小孩太累）。"
+    }
+  ],
   "overview": [
     {
       "label": "行程天数",
@@ -272,53 +337,43 @@
   ],
   "schedule": [
     [
-      "9/25",
-      "周五·中秋",
-      "上海 → 普吉岛（飞行日）"
+      "日期",
+      "安排"
     ],
     [
-      "9/26",
-      "周六·中秋",
+      "9/26（周六·中秋）",
       "普吉岛 第 1 天（适应 + 海滩）"
     ],
     [
-      "9/27",
-      "周日·中秋末",
+      "9/27（周日·中秋末）",
       "普吉岛 第 2 天（出海 / 景点）"
     ],
     [
-      "9/28",
-      "周一（请假）",
+      "9/28（周一（请假））",
       "普吉岛 第 3 天（出海 / 景点）"
     ],
     [
-      "9/29",
-      "周二（请假）",
+      "9/29（周二（请假））",
       "普吉岛 第 4 天（休闲 / SPA / 机动）"
     ],
     [
-      "9/30",
-      "周三（请假）",
+      "9/30（周三（请假））",
       "普吉岛 → 清迈（飞行日）"
     ],
     [
-      "10/1",
-      "周四·国庆",
+      "10/1（周四·国庆）",
       "清迈 第 1 天（古城 + 夜市）"
     ],
     [
-      "10/2",
-      "周五·国庆",
+      "10/2（周五·国庆）",
       "清迈 第 2 天（大象营 / 宁曼路）"
     ],
     [
-      "10/3",
-      "周六·国庆",
+      "10/3（周六·国庆）",
       "清迈 第 3 天（拜县 / 机动）"
     ],
     [
-      "10/4",
-      "周日·国庆",
+      "10/4（周日·国庆）",
       "清迈 → 上海（飞行日）"
     ]
   ],
@@ -329,6 +384,7 @@
       "航班",
       "日期",
       "时段",
+      "参考价格（人均）",
       "备注"
     ],
     [
@@ -336,6 +392,7 @@
       "9C8665（春秋）",
       "9/25",
       "PVG 12:10 → HKT 16:30",
+      "",
       "预留前往浦东机场时间，不能太早起飞"
     ],
     [
@@ -343,6 +400,7 @@
       "FD3159（亚航）",
       "9/30",
       "HKT 10:55 → CNX 12:45",
+      "",
       "—"
     ],
     [
@@ -350,6 +408,7 @@
       "9C8512（春秋）",
       "10/4",
       "CNX 08:45 → SHA 13:50",
+      "",
       "预留浦东机场回家时间，不能太晚到达"
     ]
   ],
@@ -361,7 +420,7 @@
         "酒店",
         "星级",
         "位置",
-        "5晚总价/间",
+        "参考价格（5晚/间）",
         "推荐理由"
       ],
       [
@@ -405,7 +464,7 @@
         "酒店",
         "星级",
         "位置",
-        "4晚总价/间",
+        "参考价格（4晚/间）",
         "推荐理由"
       ],
       [
@@ -438,22 +497,6 @@
       ]
     ]
   },
-  "mapPhuket": {
-    "center": [
-      7.85,
-      98.3
-    ],
-    "zoom": 11,
-    "note": "数据来源：OpenStreetMap 瓦片（Leaflet 渲染）。点击 marker 查看景点详情；彩色编号 = 对应日期。"
-  },
-  "mapChiangMai": {
-    "center": [
-      18.85,
-      98.97
-    ],
-    "zoom": 10,
-    "note": "数据来源：OpenStreetMap 瓦片（Leaflet 渲染）。点击 marker 查看景点详情；彩色编号 = 对应日期。"
-  },
   "sights": [
     {
       "id": "A",
@@ -469,7 +512,7 @@
       "lat": 7.8367,
       "lng": 98.2946,
       "day": 3,
-      "imagePath": "images/A.jpg",
+      "imagePath": "images/ph_A_942a0147.jpg",
       "imageCredit": {
         "author": "Pather alexiy",
         "license": "CC BY-SA 3.0",
@@ -490,9 +533,9 @@
       "lat": 7.8184,
       "lng": 98.2983,
       "day": 3,
-      "imagePath": "images/B.jpg",
+      "imagePath": "images/ph_B_0516d828.jpg",
       "imageCredit": {
-        "author": "Anonymous",
+        "author": "",
         "license": "CC BY-SA 3.0",
         "url": "https://commons.wikimedia.org/w/index.php?curid=2555"
       }
@@ -511,7 +554,7 @@
       "lat": 7.7618,
       "lng": 98.3058,
       "day": 5,
-      "imagePath": "images/C.jpg",
+      "imagePath": "images/ph_C_5789828d.jpg",
       "imageCredit": {
         "author": "edwin.11",
         "license": "CC BY 2.0",
@@ -532,7 +575,7 @@
       "lat": 8.2802,
       "lng": 98.5011,
       "day": 4,
-      "imagePath": "images/Q.jpg",
+      "imagePath": "images/ph_D_8cb07f51.jpg",
       "imageCredit": {
         "author": "Vyaacheslav Argenberg",
         "license": "CC BY 4.0",
@@ -552,8 +595,8 @@
       "desc": "山顶 45 米高白色大理石佛像，普吉岛地标。车直接开到山顶停车场，走几步就到佛像脚下，360° 俯瞰查龙湾+卡塔海滩+离岛。和查龙寺同方向，串成半日，老人无需爬山。",
       "lat": 7.8277,
       "lng": 98.3125,
-      "day": 5,
-      "imagePath": "images/P.jpg",
+      "day": 2,
+      "imagePath": "images/ph_P_62591f0c.jpg",
       "imageCredit": {
         "author": "Meissner24",
         "license": "CC BY-SA 3.0",
@@ -574,11 +617,11 @@
       "lat": 7.8843,
       "lng": 98.3878,
       "day": 5,
-      "imagePath": "images/S.jpg",
+      "imagePath": "images/ph_Q_43428190.jpg",
       "imageCredit": {
         "author": "Christophe95",
         "license": "CC BY-SA 4.0",
-        "url": "https://commons.wikimedia.org/w/index.php?curid=0"
+        "url": "https://commons.wikimedia.org/w/index.php?curid=24157400"
       }
     },
     {
@@ -595,7 +638,7 @@
       "lat": 7.8804,
       "lng": 98.3923,
       "day": 3,
-      "imagePath": "images/R.jpg",
+      "imagePath": "images/ph_R_9816f11e.jpg",
       "imageCredit": {
         "author": "Pattananfoto",
         "license": "CC BY-SA 4.0",
@@ -616,7 +659,7 @@
       "lat": 7.954,
       "lng": 98.284,
       "day": 5,
-      "imagePath": "images/E.jpg",
+      "imagePath": "images/ph_E_9a2b0090.jpg",
       "imageCredit": {
         "author": "Walter Lim from Singapore, Singapore",
         "license": "CC BY 2.0",
@@ -637,7 +680,7 @@
       "lat": 7.88,
       "lng": 98.35,
       "day": 4,
-      "imagePath": "images/F.jpg",
+      "imagePath": "images/ph_F_001b363f.jpg",
       "imageCredit": {
         "author": "Luke Harold",
         "license": "CC0",
@@ -658,7 +701,7 @@
       "lat": 7.8467,
       "lng": 98.337,
       "day": 4,
-      "imagePath": "images/G.jpg",
+      "imagePath": "images/ph_G_18872fe7.jpg",
       "imageCredit": {
         "author": "Edwin Lee\nderivative work: MrPanyGoff",
         "license": "CC BY 2.0",
@@ -679,7 +722,7 @@
       "lat": 7.8966,
       "lng": 98.2966,
       "day": 5,
-      "imagePath": "images/H.jpg",
+      "imagePath": "images/ph_H_d472b56b.jpg",
       "imageCredit": {
         "author": "Wolfgang Holzem",
         "license": "CC BY-SA 4.0",
@@ -700,7 +743,7 @@
       "lat": 18.7903,
       "lng": 98.9847,
       "day": 7,
-      "imagePath": "images/I.jpg",
+      "imagePath": "images/cm_I_05060d04.jpg",
       "imageCredit": {
         "author": "Jakub Hałun",
         "license": "CC BY-SA 4.0",
@@ -721,7 +764,7 @@
       "lat": 18.8,
       "lng": 98.967,
       "day": 7,
-      "imagePath": "images/J.jpg",
+      "imagePath": "images/cm_J_cd6d4f72.jpg",
       "imageCredit": {
         "author": "กสิณธร ราชโอรส",
         "license": "CC BY-SA 4.0",
@@ -742,7 +785,7 @@
       "lat": 19.15,
       "lng": 98.93,
       "day": 8,
-      "imagePath": "images/K.jpg",
+      "imagePath": "images/cm_K_ef34f006.jpg",
       "imageCredit": {
         "author": "Eyre1994100",
         "license": "CC BY-SA 4.0",
@@ -763,7 +806,7 @@
       "lat": 18.8047,
       "lng": 98.9214,
       "day": 8,
-      "imagePath": "images/L.jpg",
+      "imagePath": "images/cm_L_24dab4d4.jpg",
       "imageCredit": {
         "author": "Philip Nalangan",
         "license": "CC BY 4.0",
@@ -784,7 +827,7 @@
       "lat": 18.788,
       "lng": 99.0,
       "day": 6,
-      "imagePath": "images/M.jpg",
+      "imagePath": "images/cm_M_3d967749.jpg",
       "imageCredit": {
         "author": "calflier001",
         "license": "CC BY-SA 2.0",
@@ -805,7 +848,7 @@
       "lat": 18.804,
       "lng": 98.958,
       "day": 9,
-      "imagePath": "images/N.jpg",
+      "imagePath": "images/cm_N_6ba7c465.jpg",
       "imageCredit": {
         "author": "Athikhun.suw",
         "license": "CC BY 4.0",
@@ -826,7 +869,7 @@
       "lat": 18.802,
       "lng": 99.018,
       "day": 9,
-      "imagePath": "images/O.jpg",
+      "imagePath": "images/cm_O_5b55f1f2.jpg",
       "imageCredit": {
         "author": "Seashell",
         "license": "FAL",
@@ -834,58 +877,42 @@
       }
     }
   ],
-  "sightsExcludes": "不去拜县（Pai 单程 3.5 小时盘山路，老人小孩太累）。",
   "dayPlan": {
     "phuket": {
-      "title": "普吉岛段（9/25-9/30，共 6 天 6 晚）",
       "rows": [
         [
           "日期",
-          "主景点",
-          "辅助/晚上",
-          "区域",
+          "行程",
           "酒店"
         ],
         [
           "9/25 周五·中秋",
-          "抵达+酒店休整",
-          "A. 卡伦海滩看日落（轻度）",
-          "卡伦（首晚住这里，避免长车程）",
+          "抵达 + 酒店休整；A. 卡伦海滩看日落（卡伦，首晚住这里避免长车程）",
           "塔夫棕榈海滩度假村（卡伦）"
         ],
         [
           "9/26 周六·中秋",
-          "上午 P. 普吉大佛（地标）→ 下午 A. 卡伦海滩",
-          "A. 卡伦海滩泡水 / 酒店泳池",
-          "查龙 → 卡伦",
+          "上午 P. 普吉大佛（查龙）→ 下午 A. 卡伦海滩 + 泳池",
           "塔夫棕榈海滩度假村（卡伦）"
         ],
         [
           "9/27 周日·中秋末",
-          "A. 卡伦海滩 + B. 大佛观景台",
-          "R. Chillva Market 夜市（普吉镇）",
-          "卡伦 → 普吉镇",
+          "A. 卡伦海滩 + B. 大佛观景台（卡伦 → 普吉镇）；晚上 R. Chillva Market 夜市",
           "塔夫棕榈海滩度假村（卡伦）"
         ],
         [
           "9/28 周一（请假）",
-          "D. 攀牙湾 + 007 岛一日游（内海平稳，老小友好）",
-          "跟团回酒店休息",
-          "Ao Po 码头",
+          "D. 攀牙湾 + 007 岛一日游（Ao Po 码头 · 内海平稳老小友好）；跟团回酒店休息",
           "塔夫棕榈海滩度假村（卡伦）"
         ],
         [
           "9/29 周二（请假）",
-          "上午退房转 椰子岛 → 别墅泳池休整 → 傍晚 C. 神仙半岛日落",
-          "C 日落 30min 车程 + 1h 观景，回别墅休息",
-          "椰子岛 + 普吉南端",
+          "上午退房转 椰子岛 + 别墅泳池休整；傍晚 C. 神仙半岛日落（普吉南端）",
           "巴塞罗椰子岛 2 卧泳池别墅（椰子岛）"
         ],
         [
           "9/30 周三",
-          "上午椰子岛泳池 → 退房 → 飞清迈",
-          "12:45 抵清迈 → 入住 → M. 长康夜市晚餐",
-          "查龙码头 → 清迈",
+          "上午椰子岛泳池 → 退房 → 飞清迈（12:45 抵清迈 → 入住）；晚上 M. 长康夜市",
           "—（当天退房飞清迈）"
         ]
       ],
@@ -899,48 +926,35 @@
       ]
     },
     "chiangmai": {
-      "title": "清迈段（9/30-10/4，共 5 天 4 晚）",
       "rows": [
         [
           "日期",
-          "主景点",
-          "辅助/晚上",
-          "区域",
+          "行程",
           "酒店"
         ],
         [
           "9/30 周三",
-          "入住休整",
-          "M. 长康夜市",
-          "古城东/长康",
+          "入住休整（古城东/长康）；晚上 M. 长康夜市",
           "美丽的纳拉酒店（宁曼路）"
         ],
         [
           "10/1 周四·国庆",
-          "I. 古城寺庙游（上午）",
-          "J. 宁曼路（下午+晚餐）",
-          "古城/宁曼",
+          "上午 I. 古城寺庙游；下午 J. 宁曼路（古城/宁曼）",
           "美丽的纳拉酒店（宁曼路）"
         ],
         [
           "10/2 周五",
-          "L. 双龙寺（上午）",
-          "K. 美丹大象营（下午）",
-          "古城",
+          "上午 L. 双龙寺；下午 K. 美丹大象营（古城）",
           "美丽的纳拉酒店（宁曼路）"
         ],
         [
           "10/3 周六·国庆",
-          "机动日：清迈大学+宁曼路咖啡 或 SPA 半日",
-          "M. 周六夜市（仅周六晚）",
-          "古城/宁曼",
+          "机动日：清迈大学+宁曼路咖啡 或 SPA 半日（古城/宁曼）；晚上 M. 周六夜市（仅周六晚）",
           "美丽的纳拉酒店（宁曼路）"
         ],
         [
           "10/4 周日",
-          "退房 → 08:45 飞上海",
-          "13:50 抵虹桥",
-          "—",
+          "退房 → 08:45 飞上海（13:50 抵虹桥）",
           "—（当天退房返程）"
         ]
       ],
@@ -1243,18 +1257,57 @@
   function tpl(id) {
     return document.getElementById(id).content.firstElementChild.cloneNode(true);
   }
-  // 工具：插入 section（带 h2，可选前缀编号）
-  function section(title, num) {
+  // 工具：构建景点卡片
+  function buildSightCard(sg) {
+    const c = tpl('tpl-sight');
+    const tags = (sg.tags || []).join(',');
+    const img = c.querySelector('img');
+    img.src = sg.imageData || sg.imagePath || ('https://loremflickr.com/640/400/' + tags);
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.addEventListener('error', function once() {
+      img.removeEventListener('error', once);
+      if (sg.imageData) {
+        img.src = sg.imagePath || ('https://loremflickr.com/640/400/' + tags);
+      }
+      img.classList.add('broken');
+    });
+    img.alt = sg.name;
+    const h3 = c.querySelector('h3');
+    h3.appendChild(document.createTextNode(sg.id + '. ' + sg.name + ' '));
+    const stars = document.createElement('span');
+    stars.className = 'stars';
+    stars.textContent = '⭐'.repeat(sg.stars);
+    h3.appendChild(stars);
+    c.querySelector('.meta').textContent = '📍 ' + sg.area + ' · 建议 ' + sg.duration;
+    c.querySelector('.desc').textContent = sg.desc;
+    const credit = c.querySelector('.img-credit');
+    if (sg.imagePath) {
+      const cred = sg.imageCredit || {};
+      const author = cred.author || 'Anonymous';
+      const license = cred.license || 'CC';
+      credit.textContent = '图：' + author + ' · ' + license + ' · via Wikimedia Commons';
+    } else {
+      credit.textContent = '图：LoremFlickr（关键词 ' + tags + '）';
+    }
+    return c;
+  }
+  // 工具：插入 section（可选 h2；title 为空则不创建 h2，避免与 tab 标题重复），可指定父容器（默认 app）
+  function section(title, num, parent) {
     const s = document.createElement('section');
-    const h = document.createElement('h2');
-    h.textContent = (num != null ? (num + '. ') : '') + title;
-    s.appendChild(h);
-    app.appendChild(s);
+    if (title) {
+      const h = document.createElement('h2');
+      h.textContent = (num != null ? (num + '. ') : '') + title;
+      s.appendChild(h);
+    }
+    (parent || app).appendChild(s);
     return s;
   }
-  // 工具：把二维数组渲染成 table
+  // 工具：把二维数组渲染成 table（外层加横向滚动容器）
   function renderTable(rows, opts) {
     const highlightLast = !(opts && opts.highlightLast === false);
+    const wrap = document.createElement('div');
+    wrap.className = 'table-scroll';
     const tbl = tpl('tpl-table');
     const thead = tbl.querySelector('thead');
     const tbody = tbl.querySelector('tbody');
@@ -1263,6 +1316,7 @@
     head.forEach(c => {
       const th = document.createElement('th');
       th.textContent = c;
+      th.setAttribute('scope', 'col');
       headRow.appendChild(th);
     });
     thead.appendChild(headRow);
@@ -1276,296 +1330,299 @@
       });
       tbody.appendChild(tr);
     });
-    return tbl;
+    wrap.appendChild(tbl);
+    return wrap;
+  }
+  // 工具：把重点信息渲染为 blockquote
+  function renderStatus(text) {
+    const el = document.createElement('blockquote');
+    el.textContent = text;
+    return el;
+  }
+  // 工具：把重点信息提示块（高亮 + 描述）渲染为 note
+  function renderNote(label, text) {
+    const note = document.createElement('div');
+    note.className = 'note';
+    const strong = document.createElement('strong');
+    strong.textContent = label + '：';
+    note.appendChild(strong);
+    note.appendChild(document.createTextNode(text));
+    return note;
   }
 
-  // 1) 行程概览
-  {
-    const s = section('行程概览', 1);
-    const ul = document.createElement('ul');
-    ul.className = 'check';
-    data.overview.forEach(o => {
-      const li = document.createElement('li');
-      li.innerHTML = '<strong>' + o.label + '</strong>：' + o.value;
-      ul.appendChild(li);
+  // Tab UI：3 个顶层 tab（行程概览 / 城市行程 / 城市行程）
+  const tabs = [
+    { id: 'tab-overview', label: '行程概览（9/25-10/4）' }
+  ].concat(
+    data.cities.map(city => ({ id: 'tab-' + city.id, label: city.tabLabel, cityId: city.id }))
+  );
+  const tabBar = document.createElement('nav');
+  tabBar.className = 'tab-bar';
+  tabBar.setAttribute('role', 'tablist');
+  tabs.forEach((t, i) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.id = 'btn-' + t.id;
+    btn.textContent = t.label;
+    btn.dataset.target = t.id;
+    btn.setAttribute('role', 'tab');
+    btn.setAttribute('aria-controls', t.id);
+    btn.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
+    btn.setAttribute('tabindex', i === 0 ? '0' : '-1');
+    if (i === 0) btn.classList.add('active');
+    btn.addEventListener('click', () => switchTab(t.id));
+    tabBar.appendChild(btn);
+  });
+  app.appendChild(tabBar);
+  const tabPanels = {};
+  tabs.forEach((t, i) => {
+    const panel = document.createElement('div');
+    panel.id = t.id;
+    panel.className = 'tab-panel' + (i === 0 ? ' active' : '');
+    panel.setAttribute('role', 'tabpanel');
+    panel.setAttribute('aria-labelledby', 'btn-' + t.id);
+    app.appendChild(panel);
+    tabPanels[t.id] = panel;
+  });
+  function switchTab(id) {
+    const buttons = document.querySelectorAll('.tab-bar button');
+    buttons.forEach(b => {
+      const active = b.dataset.target === id;
+      b.classList.toggle('active', active);
+      b.setAttribute('aria-selected', active ? 'true' : 'false');
+      b.setAttribute('tabindex', active ? '0' : '-1');
     });
-    s.appendChild(ul);
-
-    const note = document.createElement('p');
-    note.style.color = 'var(--muted)';
-    note.style.fontSize = '14px';
-    note.style.marginTop = '8px';
-    note.textContent = '10 天日程明细：';
-    s.appendChild(note);
-    s.appendChild(renderTable([['日期', '星期', '安排']].concat(data.schedule), { highlightLast: false }));
+    document.querySelectorAll('.tab-panel').forEach(p =>
+      p.classList.toggle('active', p.id === id));
+    window.__mapInstances = window.__mapInstances || {};
+    Object.keys(window.__mapPending || {}).forEach(city => {
+      if (id !== 'tab-' + city) return;
+      if (!window.__mapInstances[city] && window.__mapPending[city]) {
+        window.__mapInstances[city] = window.__mapPending[city]() || null;
+      } else if (window.__mapInstances[city]) {
+        window.__mapInstances[city].invalidateSize();
+      }
+    });
   }
+  tabBar.addEventListener('keydown', (ev) => {
+    if (ev.key !== 'ArrowLeft' && ev.key !== 'ArrowRight') return;
+    const buttons = Array.from(tabBar.querySelectorAll('button'));
+    const current = buttons.findIndex(b => b === document.activeElement);
+    if (current === -1) return;
+    const next = (current + (ev.key === 'ArrowRight' ? 1 : -1) + buttons.length) % buttons.length;
+    ev.preventDefault();
+    buttons[next].focus();
+    switchTab(buttons[next].dataset.target);
+  });
+  const tabOverview = tabPanels['tab-overview'];
 
-  // 2) 航班概览
+  // 1) Tab 1：行程概览（overview + 行程安排 + 航班 + 酒店 + 机酒方案 + 注意事项 + 下一步 + 待确认）
   {
-    const s = section('航班概览', 2);
-    const status = document.createElement('blockquote');
-    status.textContent = data.flightStatus;
-    s.appendChild(status);
+    const s = section(null, null, tabOverview);
+
+    // 1.1 行程概览（数组：label/value）
+    if (Array.isArray(data.overview) && data.overview.length) {
+      const h = document.createElement('h2');
+      h.textContent = '行程概览';
+      s.appendChild(h);
+      const ul = document.createElement('ul');
+      ul.className = 'check';
+      data.overview.forEach(o => {
+        const li = document.createElement('li');
+        const strong = document.createElement('strong');
+        strong.textContent = o.label;
+        li.appendChild(strong);
+        li.appendChild(document.createTextNode('：' + o.value));
+        ul.appendChild(li);
+      });
+      s.appendChild(ul);
+    }
+
+    // 1.2 行程安排
+    const h1 = document.createElement('h2');
+    h1.textContent = '行程安排';
+    s.appendChild(h1);
+    s.appendChild(renderTable(data.schedule, { highlightLast: false }));
+
+    // 1.3 航班概览
+    const h2 = document.createElement('h2');
+    h2.textContent = '航班概览';
+    s.appendChild(h2);
+    s.appendChild(renderStatus(data.flightStatus));
     s.appendChild(renderTable(data.flights, { highlightLast: false }));
+    if (data.flightNote) s.appendChild(renderNote('航班说明', data.flightNote));
+
+    // 1.4 酒店概览
+    const h3 = document.createElement('h2');
+    h3.textContent = '酒店概览';
+    s.appendChild(h3);
+    s.appendChild(renderStatus(data.hotelStatus));
+    if (data.hotelNote) s.appendChild(renderNote('价格说明', data.hotelNote));
+    data.cities.forEach((city, idx) => {
+      const sub = document.createElement('h4');
+      if (idx > 0) sub.className = 'section-spaced';
+      sub.textContent = city.hotelHeading;
+      s.appendChild(sub);
+      s.appendChild(renderTable(data.hotels[city.id], { highlightLast: false }));
+    });
+
+    // 1.5 行程预算（budget 或 plans 二选一）
+    if (data.budget) {
+      const h4 = document.createElement('h2');
+      h4.textContent = '行程预算';
+      s.appendChild(h4);
+      s.appendChild(renderTable(data.budget.rows, { highlightLast: false }));
+      if (data.budget.note) s.appendChild(renderNote('价格说明', data.budget.note));
+    } else if (Array.isArray(data.plans) && data.plans.length) {
+      const h4 = document.createElement('h2');
+      h4.textContent = '机酒方案';
+      s.appendChild(h4);
+      if (Array.isArray(data.plansNote) && data.plansNote.length) {
+        const note = document.createElement('div');
+        note.className = 'note';
+        const strong = document.createElement('strong');
+        strong.textContent = '重要说明';
+        note.appendChild(strong);
+        const ol = document.createElement('ol');
+        ol.style.margin = '6px 0 0 18px';
+        ol.style.padding = '0';
+        data.plansNote.forEach(t => {
+          const li = document.createElement('li');
+          li.textContent = t;
+          ol.appendChild(li);
+        });
+        note.appendChild(ol);
+        s.appendChild(note);
+      }
+      data.plans.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'plan-card';
+        const body = document.createElement('div');
+        body.className = 'body';
+        const title = document.createElement('div');
+        title.className = 'plan-title';
+        title.textContent = p.name;
+        body.appendChild(title);
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        meta.textContent = p.meta;
+        body.appendChild(meta);
+        body.appendChild(renderTable(p.rows));
+        card.appendChild(body);
+        s.appendChild(card);
+      });
+    }
+
+    // 1.6 注意事项
+    if (Array.isArray(data.notes) && data.notes.length) {
+      const h5 = document.createElement('h2');
+      h5.textContent = '注意事项';
+      s.appendChild(h5);
+      const ul = document.createElement('ul');
+      data.notes.forEach(n => {
+        const li = document.createElement('li');
+        li.textContent = n;
+        ul.appendChild(li);
+      });
+      s.appendChild(ul);
+    }
+
+    // 1.7 下一步
+    if (Array.isArray(data.nextSteps) && data.nextSteps.length) {
+      const h6 = document.createElement('h2');
+      h6.textContent = '下一步';
+      s.appendChild(h6);
+      const ol = document.createElement('ol');
+      data.nextSteps.forEach(n => {
+        const li = document.createElement('li');
+        li.textContent = n;
+        ol.appendChild(li);
+      });
+      s.appendChild(ol);
+    }
+
+    // 1.8 待确认
+    if (Array.isArray(data.questions) && data.questions.length) {
+      const h7 = document.createElement('h2');
+      h7.textContent = '待确认';
+      s.appendChild(h7);
+      const ol = document.createElement('ol');
+      data.questions.forEach(q => {
+        const li = document.createElement('li');
+        li.textContent = q;
+        ol.appendChild(li);
+      });
+      s.appendChild(ol);
+    }
   }
 
-  // 3) 酒店概览
-  {
-    const s = section('酒店概览', 3);
-    const status = document.createElement('blockquote');
-    status.textContent = data.hotelStatus;
-    s.appendChild(status);
-    const note = document.createElement('div');
-    note.className = 'note';
-    note.innerHTML = '<strong>价格说明</strong>：' + data.hotelNote;
-    s.appendChild(note);
+  // 2/3) Tab 2-N：城市行程（行程规划 + 景点介绍）
+  data.cities.forEach(city => {
+    const panel = tabPanels['tab-' + city.id];
+    const s = section(null, null, panel);
 
-    const sub1 = document.createElement('h3');
-    sub1.textContent = '普吉岛 5 晚（9/25-9/30）';
-    s.appendChild(sub1);
-    s.appendChild(renderTable(data.hotels.phuket, { highlightLast: false }));
-
-    const sub2 = document.createElement('h3');
-    sub2.style.marginTop = '20px';
-    sub2.textContent = '清迈 4 晚（9/30-10/3）';
-    s.appendChild(sub2);
-    s.appendChild(renderTable(data.hotels.chiangmai, { highlightLast: false }));
-  }
-
-  // 4) 普吉岛行程（含 4.1 行程规划 / 4.2 景点介绍）
-  {
-    const s = section('普吉岛行程', 4);
-
-    // 4.1 行程规划
-    const h1 = document.createElement('h3');
-    h1.style.marginTop = '12px';
-    h1.textContent = '4.1 行程规划';
+    const h1 = document.createElement('h2');
+    h1.textContent = '行程规划';
     s.appendChild(h1);
 
-    // 行程地图（地理概览）
     const mapIntro = document.createElement('p');
-    mapIntro.style.color = 'var(--muted)';
-    mapIntro.style.fontSize = '14px';
-    mapIntro.style.marginTop = '0';
-    mapIntro.textContent = '每日行程的地理分布（点击 marker 查看景点详情）：';
+    mapIntro.className = 'map-intro';
+    mapIntro.textContent = city.map.intro;
     s.appendChild(mapIntro);
     const div = document.createElement('div');
-    div.id = 'map-phuket';
+    div.id = 'map-' + city.id;
     div.className = 'leaflet-map';
     s.appendChild(div);
     const credit = document.createElement('p');
     credit.className = 'img-credit';
-    credit.textContent = data.mapPhuket.note;
+    credit.textContent = city.map.credit;
     s.appendChild(credit);
-    window.__initMaps = window.__initMaps || [];
-    window.__initMaps.push(() => renderMap('phuket', 'map-phuket', data.mapPhuket, data.sights, data.dayColors, data.dayRoutes));
+    window.__mapPending = window.__mapPending || {};
+    window.__mapPending[city.id] = () => renderMap(
+      city.id, 'map-' + city.id, city.map, data.sights, data.dayColors, data.dayRoutes
+    );
 
-    // 每日表
-    const phuketPlan = data.dayPlan.phuket;
-    s.appendChild(renderTable(phuketPlan.rows));
-    const r1 = document.createElement('div');
-    r1.style.marginTop = '8px';
-    r1.innerHTML = '<strong>地理分块理由</strong>：<ul>' +
-      phuketPlan.reasons.map(x => '<li>' + x + '</li>').join('') + '</ul>';
-    s.appendChild(r1);
+    const plan = data.dayPlan[city.id];
+    if (plan) {
+      s.appendChild(renderTable(plan.rows));
+      if (Array.isArray(plan.reasons) && plan.reasons.length) {
+        const reasons = document.createElement('div');
+        reasons.className = 'note';
+        const strong = document.createElement('strong');
+        strong.textContent = '地理分块理由';
+        reasons.appendChild(strong);
+        reasons.appendChild(document.createTextNode('：'));
+        const ul = document.createElement('ul');
+        ul.style.margin = '6px 0 0 18px';
+        ul.style.padding = '0';
+        plan.reasons.forEach(r => {
+          const li = document.createElement('li');
+          li.textContent = r;
+          ul.appendChild(li);
+        });
+        reasons.appendChild(ul);
+        s.appendChild(reasons);
+      }
+    }
 
-    // 待确认（普吉相关）
-    const qh = document.createElement('h3');
-    qh.style.marginTop = '20px';
-    qh.textContent = '待确认';
-    s.appendChild(qh);
-    const qn = document.createElement('div');
-    qn.className = 'note';
-    qn.innerHTML = '下方 1-3 为普吉段待确认；4-5 见清迈段。';
-    s.appendChild(qn);
-    const ol = document.createElement('ol');
-    data.questions.slice(0, 3).forEach(q => {
-      const li = document.createElement('li');
-      li.textContent = q;
-      ol.appendChild(li);
-    });
-    s.appendChild(ol);
-
-    // 4.2 景点介绍
-    const h2 = document.createElement('h3');
-    h2.style.marginTop = '24px';
-    h2.textContent = '4.2 景点介绍';
+    const h2 = document.createElement('h2');
+    h2.textContent = '景点介绍';
     s.appendChild(h2);
 
-    // 景点卡片
-    data.sights.filter(x => x.city === 'phuket').forEach(sg => {
-      const c = tpl('tpl-sight');
-      const tags = sg.tags.join(',');
-      const img = c.querySelector('img');
-      img.src = sg.imageData || sg.imagePath || ('https://loremflickr.com/640/400/' + tags);
-      img.addEventListener('error', function once() {
-        img.removeEventListener('error', once);
-        if (sg.imageData) {
-          img.src = sg.imagePath || ('https://loremflickr.com/640/400/' + tags);
-        }
-        img.classList.add('broken');
-      });
-      img.alt = sg.name;
-      c.querySelector('h3').innerHTML =
-        sg.id + '. ' + sg.name + ' <span class="stars">' + '⭐'.repeat(sg.stars) + '</span>';
-      c.querySelector('.meta').textContent = '📍 ' + sg.area + ' · 建议 ' + sg.duration;
-      c.querySelector('.desc').textContent = sg.desc;
-      if (sg.imagePath) {
-        const cred = sg.imageCredit || {};
-        const author = cred.author || 'Anonymous';
-        const license = cred.license || 'CC';
-        c.querySelector('.img-credit').textContent =
-          '图：' + author + ' · ' + license + ' · via Wikimedia Commons';
-      } else {
-        c.querySelector('.img-credit').textContent = '图：LoremFlickr（关键词 ' + tags + '）';
-      }
-      s.appendChild(c);
+    if (city.sightsExcludes) {
+      const ex = document.createElement('blockquote');
+      ex.textContent = city.sightsExcludes;
+      s.appendChild(ex);
+    }
+
+    data.sights.filter(x => x.city === city.id).forEach(sg => {
+      s.appendChild(buildSightCard(sg));
     });
-  }
+  });
 
-  // 5) 清迈行程（含 5.1 行程规划 / 5.2 景点介绍）
-  {
-    const s = section('清迈行程', 5);
-
-    // 5.1 行程规划
-    const h1 = document.createElement('h3');
-    h1.style.marginTop = '12px';
-    h1.textContent = '5.1 行程规划';
-    s.appendChild(h1);
-
-    // 行程地图（地理概览）
-    const mapIntro = document.createElement('p');
-    mapIntro.style.color = 'var(--muted)';
-    mapIntro.style.fontSize = '14px';
-    mapIntro.style.marginTop = '0';
-    mapIntro.textContent = '每日行程的地理分布（点击 marker 查看景点详情）：';
-    s.appendChild(mapIntro);
-    const div = document.createElement('div');
-    div.id = 'map-chiangmai';
-    div.className = 'leaflet-map';
-    s.appendChild(div);
-    const credit = document.createElement('p');
-    credit.className = 'img-credit';
-    credit.textContent = data.mapChiangMai.note;
-    s.appendChild(credit);
-    window.__initMaps = window.__initMaps || [];
-    window.__initMaps.push(() => renderMap('chiangmai', 'map-chiangmai', data.mapChiangMai, data.sights, data.dayColors, data.dayRoutes));
-
-    // 每日表
-    const cmPlan = data.dayPlan.chiangmai;
-    s.appendChild(renderTable(cmPlan.rows));
-    const r1 = document.createElement('div');
-    r1.style.marginTop = '8px';
-    r1.innerHTML = '<strong>地理分块理由</strong>：<ul>' +
-      cmPlan.reasons.map(x => '<li>' + x + '</li>').join('') + '</ul>';
-    s.appendChild(r1);
-
-    // 待确认（清迈相关）
-    const qh = document.createElement('h3');
-    qh.style.marginTop = '20px';
-    qh.textContent = '待确认';
-    s.appendChild(qh);
-    const qn = document.createElement('div');
-    qn.className = 'note';
-    qn.innerHTML = '下方 1-2 为清迈段待确认；普吉段见上一节。';
-    s.appendChild(qn);
-    const ol = document.createElement('ol');
-    data.questions.slice(3).forEach(q => {
-      const li = document.createElement('li');
-      li.textContent = q;
-      ol.appendChild(li);
-    });
-    s.appendChild(ol);
-
-    // 5.2 景点介绍
-    const h2 = document.createElement('h3');
-    h2.style.marginTop = '24px';
-    h2.textContent = '5.2 景点介绍';
-    s.appendChild(h2);
-
-    // 不去拜县提示
-    const excl = document.createElement('blockquote');
-    excl.textContent = data.sightsExcludes;
-    s.appendChild(excl);
-
-    // 景点卡片
-    data.sights.filter(x => x.city === 'chiangmai').forEach(sg => {
-      const c = tpl('tpl-sight');
-      const tags = sg.tags.join(',');
-      const img = c.querySelector('img');
-      img.src = sg.imageData || sg.imagePath || ('https://loremflickr.com/640/400/' + tags);
-      img.addEventListener('error', function once() {
-        img.removeEventListener('error', once);
-        if (sg.imageData) {
-          img.src = sg.imagePath || ('https://loremflickr.com/640/400/' + tags);
-        }
-        img.classList.add('broken');
-      });
-      img.alt = sg.name;
-      c.querySelector('h3').innerHTML =
-        sg.id + '. ' + sg.name + ' <span class="stars">' + '⭐'.repeat(sg.stars) + '</span>';
-      c.querySelector('.meta').textContent = '📍 ' + sg.area + ' · 建议 ' + sg.duration;
-      c.querySelector('.desc').textContent = sg.desc;
-      if (sg.imagePath) {
-        const cred = sg.imageCredit || {};
-        const author = cred.author || 'Anonymous';
-        const license = cred.license || 'CC';
-        c.querySelector('.img-credit').textContent =
-          '图：' + author + ' · ' + license + ' · via Wikimedia Commons';
-      } else {
-        c.querySelector('.img-credit').textContent = '图：LoremFlickr（关键词 ' + tags + '）';
-      }
-      s.appendChild(c);
-    });
-  }
-
-  // 6) 行程预算（原 3 套机酒方案）
-  {
-    const s = section('行程预算', 6);
-    const note = document.createElement('div');
-    note.className = 'note';
-    note.innerHTML = '<strong>重要说明</strong>：<ol style="margin: 6px 0 0 18px; padding: 0;">' +
-      data.plansNote.map(x => '<li>' + x + '</li>').join('') + '</ol>';
-    s.appendChild(note);
-    data.plans.forEach(p => {
-      const card = tpl('tpl-plan');
-      card.querySelector('.plan-title').textContent = p.name;
-      card.querySelector('.meta').textContent = p.meta;
-      card.querySelector('.plan-table').appendChild(renderTable(p.rows));
-      s.appendChild(card);
-    });
-  }
-
-  // 7) 注意事项
-  {
-    const s = section('注意事项', 7);
-    const ul = document.createElement('ul');
-    data.notes.forEach(n => {
-      const li = document.createElement('li');
-      li.textContent = n;
-      ul.appendChild(li);
-    });
-    s.appendChild(ul);
-  }
-
-  // 8) 下一步
-  {
-    const s = section('下一步', 8);
-    const ol = document.createElement('ol');
-    data.nextSteps.forEach(n => {
-      const li = document.createElement('li');
-      li.textContent = n;
-      ol.appendChild(li);
-    });
-    s.appendChild(ol);
-  }
-
-  // 生成时间
+  // 最后维护日期来自数据
   document.getElementById('gen-time').textContent =
-    '统一维护版（HTML 唯一源） · 最后更新：' + new Date().toISOString().slice(0, 10);
-
-  // 触发 Leaflet 地图初始化（DOM 已挂载）
-  (window.__initMaps || []).forEach(fn => fn());
+    '统一维护版（HTML 唯一源） · 最后更新：' + data.meta.updatedAt;
 
   /**
    * Leaflet 地图渲染：
@@ -1573,6 +1630,11 @@
    *   - 弹窗（景点名 + 推荐指数 + 区域）
    *   - 每日路线连线（按 dayRoutes.sights 顺序）
    *   - 自定义图例（按日色块）
+   *
+   * mapCfg 支持字段：
+   *   tile     'amap'（高德）或 'osm-de'（OSM 德国镜像）
+   *   maxZoom  fitBounds 限制的最大缩放级别（可选）
+   *   center/zoom 由 dayPlan 之外的全局配置给出（不在本函数读取）
    */
   function renderMap(city, divId, mapCfg, allSights, dayColors, dayRoutes) {
     if (typeof L === 'undefined') {
@@ -1580,19 +1642,43 @@
         '<div style="padding:24px;color:#b91c1c;">Leaflet CDN 加载失败，请检查网络。</div>';
       return;
     }
-    const map = L.map(divId).setView(mapCfg.center, mapCfg.zoom);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '© OpenStreetMap'
+    // 中心/缩放：用 dayRoutes 第一天非空路线 → 中心，否则默认普吉/清迈
+    const citySights = allSights.filter(sg => sg.city === city && sg.lat && sg.lng);
+    const fallbackCenter = city === 'phuket' ? [7.85, 98.3] : [18.85, 98.97];
+    const fallbackZoom = city === 'phuket' ? 11 : 10;
+    let center = fallbackCenter, zoom = fallbackZoom;
+    if (citySights.length) {
+      const lats = citySights.map(sg => sg.lat);
+      const lngs = citySights.map(sg => sg.lng);
+      center = [(Math.min(...lats) + Math.max(...lats)) / 2, (Math.min(...lngs) + Math.max(...lngs)) / 2];
+      zoom = fallbackZoom;
+    }
+    const map = L.map(divId).setView(center, zoom);
+    const tile = (mapCfg && mapCfg.tile) || 'osm-de';
+    const tileCfg = (tile === 'osm-de')
+      ? {
+          url: 'https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png',
+          subdomains: ['a', 'b', 'c'],
+          maxZoom: 18,
+          attribution: '© OpenStreetMap-DE / OSM contributors'
+        }
+      : {
+          url: 'https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}',
+          subdomains: ['1', '2', '3', '4'],
+          maxZoom: 19,
+          attribution: '© 高德地图 AutoNavi'
+        };
+    L.tileLayer(tileCfg.url, {
+      maxZoom: tileCfg.maxZoom,
+      subdomains: tileCfg.subdomains,
+      attribution: tileCfg.attribution
     }).addTo(map);
 
-    // 取本城市景点 + 当日路线涉及的景点
-    const citySights = allSights.filter(sg => sg.city === city && sg.lat && sg.lng);
     const colorByDay = {};
     dayColors.forEach(d => colorByDay[d.id] = d.color);
 
-    // marker
     const markers = [];
+    const group = L.featureGroup();
     citySights.forEach(sg => {
       const color = colorByDay[sg.day] || '#666';
       const icon = L.divIcon({
@@ -1602,7 +1688,7 @@
         iconAnchor: [16, 32],
         popupAnchor: [0, -32]
       });
-      const m = L.marker([sg.lat, sg.lng], { icon: icon }).addTo(map);
+      const m = L.marker([sg.lat, sg.lng], { icon: icon });
       m.bindPopup(
         '<h4>' + sg.id + '. ' + sg.name + '</h4>' +
         '<div style="color:' + color + ';font-weight:600;">' +
@@ -1611,10 +1697,11 @@
         '<div style="margin-top:4px;">⏱ ' + sg.duration + '</div>' +
         '<div style="margin-top:4px;">推荐指数：<span style="color:#f59e0b;">' + '⭐'.repeat(sg.stars) + '</span></div>'
       );
+      group.addLayer(m);
       markers.push({ id: sg.id, latlng: [sg.lat, sg.lng], day: sg.day });
     });
+    group.addTo(map);
 
-    // 按日路线连线（仅连 ≥2 个景点的天）
     const routes = (dayRoutes[city] || []).filter(d => d.sights.length >= 2);
     routes.forEach(d => {
       const pts = d.sights.map(sid => {
@@ -1623,19 +1710,26 @@
       }).filter(Boolean);
       if (pts.length >= 2) {
         const color = colorByDay[d.day] || '#666';
-        L.polyline(pts, {
+        const line = L.polyline(pts, {
           color: color,
           weight: 3,
           opacity: 0.7,
           dashArray: '6, 6'
         }).addTo(map);
+        line.getLatLngs().forEach(ll => group.addLayer(L.marker(ll, { opacity: 0, interactive: false })));
       }
     });
 
-    // 图例
+    if (group.getLayers().length > 0) {
+      const maxZoom = (mapCfg && typeof mapCfg.maxZoom === 'number') ? mapCfg.maxZoom : 13;
+      map.fitBounds(group.getBounds().pad(0.12), { maxZoom: maxZoom });
+    }
+
     const legend = document.createElement('div');
     legend.className = 'map-legend';
-    const usedDays = new Set(citySights.map(sg => sg.day));
+    const usedDays = Array.from(new Set(citySights.map(sg => sg.day)))
+      .filter(d => d !== null && d !== undefined)
+      .sort((a, b) => a - b);
     usedDays.forEach(dayId => {
       const d = dayColors.find(x => x.id === dayId);
       if (!d) return;
@@ -1645,6 +1739,7 @@
       legend.appendChild(item);
     });
     document.getElementById(divId).parentNode.insertBefore(legend, document.getElementById(divId).nextSibling);
+    return map;
   }
 })();
 </script>
