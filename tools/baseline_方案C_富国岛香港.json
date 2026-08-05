@@ -9,7 +9,7 @@
     "schedule_rows": 11,
     "flights_rows": 4,
     "hotels_by_city_rows": { "hk": 2, "phuquoc": 3 },
-    "day_plan_by_city_rows": { "hk": 6, "phuquoc": 8 },
+    "day_plan_by_city_rows": { "hk": 5, "phuquoc": 8 },
     "budget_rows": 7,
     "notes_items": 6,
     "image_credits_entries": 31
