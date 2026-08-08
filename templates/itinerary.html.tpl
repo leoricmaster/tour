@@ -6,8 +6,8 @@
 <title>{{TITLE}}</title>
 
 <!-- Leaflet 地图库（CDN · 国内静态资源 · 大陆可访问） -->
-<link rel="stylesheet" href="https://cdn.staticfile.net/leaflet/1.9.4/leaflet.min.css" crossorigin="">
-<script src="https://cdn.staticfile.net/leaflet/1.9.4/leaflet.min.js" crossorigin=""></script>
+<link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.css" crossorigin="">
+<script src="https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.js" crossorigin=""></script>
 <style>
 {{CSS}}
 </style>
