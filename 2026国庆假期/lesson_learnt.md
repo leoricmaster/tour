@@ -105,13 +105,13 @@ opener.addheaders = [("User-Agent", "TourPlanner/1.0 (personal)")]
 ```
 项目根/
 ├── 背景信息.md
-├── 经验·给未来的自己.md
+├── lesson_learnt.md       ← 本文件
 ├── 方案A_普吉岛清迈/
 │   ├── 普吉岛清迈游.html
 │   ├── image_credits.json
 │   └── images/             ← 该方案所有图片
 ├── 方案B_xxx/                  （将来扩展）
-└── 工具/
+└── tools/
     ├── build_base64.py     ← 通用工具，不专属方案
     └── fetch_image.py      ← 通用维基下载工具
 ```
@@ -127,17 +127,17 @@ opener.addheaders = [("User-Agent", "TourPlanner/1.0 (personal)")]
 
 1. **确认是哪个方案**：进入 `方案X_xxx/` 子目录
 2. 在 `方案X_xxx/images/` 里存新图，命名为 `{ID}.jpg`
-3. （可选）运行 `工具/fetch_image.py 方案X_xxx --jobs jobs.json` 查维基拿到作者/协议
+3. （可选）运行 `tools/fetch_image.py 方案X_xxx --jobs jobs.json` 查维基拿到作者/协议
 4. 把图注对应的 `imageCredit` 字段更新到对应 HTML 的 `#data.sights` JSON 块里
 5. **肉眼检查新图是否真的对应该景点**（防止关键词歧义）
 6. 浏览器刷新即可
 
 ## 5. 维基 API 下载图片
 
-用 `工具/fetch_image.py`（已模板化）：
+用 `tools/fetch_image.py`（已模板化）：
 
 ```bash
-cd 工具
+cd tools
 # 1) 准备 jobs.json
 cat > /tmp/jobs.json <<EOF
 [
@@ -190,6 +190,8 @@ with opener.open(thumb, timeout=30) as r:
 # 4) 肉眼检查图片内容
 ```
 
+> **历史背景**：此模板早期独立放在 `工具/fetch_image.py`（中文目录），已迁移到 `tools/fetch_image.py` 避免 Python 编码坑，详见 commit `ce4892e`。
+
 ## 6. `build_base64.py` 用法（单方案分享，通用工具）
 
 **用途**：把指定方案目录下的 `images/*.jpg` 内嵌进 HTML，生成单文件（约 1.5-2MB），方便微信/邮件转发。
@@ -200,21 +202,22 @@ with opener.open(thumb, timeout=30) as r:
 
 **怎么用**：
 ```bash
-cd 工具
-python3 build_base64.py ../方案A_普吉岛清迈 --html 普吉岛清迈游.html
+cd tools
+python3 build_base64.py ../方案A_普吉岛清迈 --html 普吉岛清迈游.html --output 普吉岛清迈游_分享版.html
 ```
 脚本会：
 1. 读 `方案A_普吉岛清迈/images/` 下的所有 jpg（按 HTML 里 `imagePath` 字段的引用）
-2. base64 编码后写入 `普吉岛清迈游.html` 的 `#data.sights[*].imageData`
-3. HTML 文件变大到 ~2MB
+2. base64 编码后写入 **新 HTML** 的 `#data.sights[*].imageData`（不修改原 HTML）
+3. 新 HTML 文件变大到 ~2MB
 
 之后整份 HTML 即可独立转发（不需要 images/ 目录）。
 
 **参数**：
 - `scheme_dir`（必填）：方案目录路径
-- `--html`（可选）：HTML 文件名，默认 = 方案目录名.html
+- `--html`（必填）：源 HTML 文件名
+- `--output`（必填）：输出文件名，必须以 `_分享版.html` / `_share.html` / `_base64.html` 结尾（脚本会拒绝覆盖原 HTML）
 
-**注意**：`build_base64.py` 是**通用工具**（在 `工具/` 目录），不专属任何方案。所有方案共用一份。
+**注意**：`build_base64.py` 是**通用工具**（在 `tools/` 目录），不专属任何方案。所有方案共用一份。
 
 **还原**：想恢复成"外部图片"版本，只需在 HTML 里把所有 `imageData` 字段删除（渲染器会自动降级到 imagePath）。
 
@@ -222,7 +225,7 @@ python3 build_base64.py ../方案A_普吉岛清迈 --html 普吉岛清迈游.htm
 
 - **单源**：每个方案永远是 HTML 一份，不要再建 MD 副本
 - **结构 vs 数据分离**：HTML 结构（template/render）只改模板；内容只改 JSON
-- **图片本地化**：所有用到的图片下到对应方案的 `images/<方案名>/` 子目录，不要依赖外链
+- **图片本地化**：所有用到的图片下到对应方案的 `images/` 子目录（不再用 `images/<方案名>/`），不要依赖外链
 - **方案隔离**：每个方案独立的 HTML / images 子目录 / image_credits JSON / fetch 脚本
 - **修改零依赖**：脚本用纯 Python 标准库；CSS/JS 全部内联；不引入 npm/pip
 - **可降级**：每个外部依赖都有兜底（imageData→imagePath→LoremFlickr）
