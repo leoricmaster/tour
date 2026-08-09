@@ -1,8 +1,8 @@
 {
   "_comment": "Renderer regression baseline. Counts are derived from the renderer structure and #data. They are not direct user-visible UI counts, but invariants of the rendered output.",
   "data": {
-    "sights_total": 31,
-    "sights_by_city": { "hk": 19, "phuquoc": 12 },
+    "sights_total": 33,
+    "sights_by_city": { "hk": 19, "phuquoc": 14 },
     "cities": 2,
     "day_colors": 10,
     "day_routes_by_city": { "hk": 4, "phuquoc": 5 },
@@ -12,13 +12,13 @@
     "day_plan_by_city_rows": { "hk": 5, "phuquoc": 8 },
     "budget_rows": 7,
     "notes_items": 6,
-    "image_credits_entries": 31
+    "image_credits_entries": 33
   },
   "rendered": {
     "tab_buttons": 3,
     "tab_panels": 3,
     "map_divs": 2,
-    "card_elements": 31,
+    "card_elements": 33,
     "table_scroll_wrappers": 7,
     "h2_in_overview": 5,
     "h4_in_overview": 2,
@@ -29,7 +29,7 @@
     "blockquotes_per_city": 0
   },
   "share": {
-    "main_embedded": 31,
+    "main_embedded": 33,
     "extra_embedded": 0
   },
   "html_source_invariants": {

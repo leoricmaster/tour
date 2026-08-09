@@ -1,11 +1,21 @@
 {
-  "images/pq_A_a5b245c6.jpg": {
-    "title": "index.php?curid=185527343",
+  "images/pq_A_4c18f250.jpg": {
+    "title": "File:Phu Quoc beach Saigon Phu Quoc Resort and Spa.jpg",
+    "author": "Elmschrat",
+    "license": "CC0",
+    "url": "https://commons.wikimedia.org/wiki/File:Phu_Quoc_beach_Saigon_Phu_Quoc_Resort_and_Spa.jpg",
+    "sha1_8": "4c18f250",
+    "sight_id": "A",
+    "city": "phuquoc",
+    "role": "main"
+  },
+  "images/pq_KM_a5b245c6.jpg": {
+    "title": "File:Jw-marriott-phu-quoc-bai-kem.jpg",
     "author": "Vivu Vietnam",
     "license": "CC BY-SA 4.0",
-    "url": "https://commons.wikimedia.org/w/index.php?curid=185527343",
+    "url": "https://commons.wikimedia.org/wiki/File:Jw-marriott-phu-quoc-bai-kem.jpg",
     "sha1_8": "a5b245c6",
-    "sight_id": "A",
+    "sight_id": "KM",
     "city": "phuquoc",
     "role": "main"
   },
@@ -306,6 +316,16 @@
     "url": "https://commons.wikimedia.org/wiki/File:Cong-vien-nuoc-aquatopia-5.jpg",
     "sha1_8": "0ea37a81",
     "sight_id": "AT",
+    "city": "phuquoc",
+    "role": "main"
+  },
+  "images/pq_SB_70352184.jpg": {
+    "title": "File:Starfishes on the Starfish Beach, Phu Quoc, Vietnam.jpg",
+    "author": "Alexey Komarov",
+    "license": "CC BY-SA 4.0",
+    "url": "https://commons.wikimedia.org/wiki/File:Starfishes_on_the_Starfish_Beach,_Phu_Quoc,_Vietnam.jpg",
+    "sha1_8": "70352184",
+    "sight_id": "SB",
     "city": "phuquoc",
     "role": "main"
   }
