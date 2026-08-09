@@ -11,9 +11,10 @@
 
 1. **本文件**（你正在读的）— 协作偏好
 2. `README.md` — 项目结构
-3. `tools/README.md` — 工具脚本（图片管理）
-4. `guides/` — 参考知识（MCP 配置、后续方向）
-5. `2026国庆假期/工作方法.md` — 行程规划流程
+3. `tools/README.md` — 工具脚本（图片管理、构建、校验、分享版）
+4. `guides/MCP_RECOVERY.md` — 新机器/新会话恢复 MCP 工具（HTTP 代理、12306、weather、Tuniu、RollingGo）
+5. `2026国庆假期/lesson_learnt.md` — 已踩过的坑（图片/HTML 渲染器/方案隔离）
+6. `2026国庆假期/工作方法.md` — 行程规划流程（参考；4 步流程，可选）
 
 ---
 
@@ -45,7 +46,7 @@
 
 - **个人旅游行程规划库**（方案A/B/C 等）
 - **自由行**，无领队、无旅行社；人员随家庭/朋友组合
-- 真实出行前会被分享给同行人查看
+- **最终产物（分享版 HTML）会被分享给同行人在中国大陆打开**（无 VPN 默认假设）
 
 ### 2.2 真实性约束
 
@@ -61,7 +62,7 @@
 ### 2.3 人员规模提示
 
 - 默认按**多人家庭**规划（每方案人数不同）
-- 7 人 = 6 大 1 小 是当前典型规模
+- 7 人 = 6 大 1 小 是当前典型规模（爸爸/妈妈/女儿 + 姥爷/姥姥/奶奶/姨奶）
 - 人数变化时同步检查：酒店房型（3 间房 vs 1 栋别墅）、机票张数、用餐安排
 
 ---
@@ -71,10 +72,12 @@
 ### 3.0 ⚠️ HTML 是构建产物，不是手编源
 
 ```text
-templates/itinerary.{html,css,js}.tpl   ← 共享骨架（可手编）
-<scheme>/data.json                     ← 逐方案数据（可手编）
-<scheme>/<名>游.html                   ← 产物 ❌ 不要手编，改了会被覆盖
-<scheme>/<名>游_分享版.html            ← 产物 ❌ 不要手编
+templates/itinerary.html.tpl     ← 共享 HTML 壳（可手编）
+templates/itinerary.css.tpl      ← 共享 CSS（可手编）
+templates/itinerary.js.tpl       ← 共享 JS 渲染器（可手编）
+<scheme>/data.json               ← 逐方案数据（可手编）
+<scheme>/<名>游.html             ← 产物 ❌ 不要手编，改了会被覆盖
+<scheme>/<名>游_分享版.html      ← 产物 ❌ 不要手编
 ```
 
 主 HTML 是 `data.json` + `templates/` 的纯函数计算结果：
@@ -82,7 +85,7 @@ templates/itinerary.{html,css,js}.tpl   ← 共享骨架（可手编）
 ```bash
 # 改 data.json 或 templates/ 后必须跑
 python3 tools/build_itinerary.py <方案目录>          # 重新生成主 HTML
-python3 tools/build_base64.py    <方案目录> \         # 生成分享版
+python3 tools/build_base64.py    <方案目录> \         # 生成分享版（不覆盖原 HTML）
   --html <名>游.html --output <名>游_分享版.html
 ```
 
@@ -97,7 +100,7 @@ python3 tools/build_base64.py    <方案目录> \         # 生成分享版
 
 - 只改 `images/` 里的图片文件本身
 - 调整 `tools/` 里的校验脚本
-- 修改文档（`README.md` / `AGENTS.md` / `tools/README.md`）
+- 修改文档（`README.md` / `AGENTS.md` / `tools/README.md` / `lesson_learnt.md`）
 
 **如果意外手改了 HTML，验证是否能重新生成**：
 
@@ -113,7 +116,7 @@ python3 tools/build_base64.py    <方案目录> \         # 生成分享版
 ```text
 templates/itinerary.html.tpl   # HTML 壳（{{TITLE}} {{CSS}} {{DATA}} {{JS}}）
 templates/itinerary.css.tpl    # 共享 CSS
-templates/itinerary.js.tpl     # 共享 JS 渲染器
+templates/itinerary.js.tpl     # 共享 JS 渲染器（不包含 <script> 包装）
 
 方案X/data.json                # 数据源（必填；含 title、cities、sights、dayPlan、dayColors…）
 方案X/<名>游.html              # 构建产物，gitignore
@@ -129,6 +132,7 @@ templates/itinerary.js.tpl     # 共享 JS 渲染器
 - ❌ 不再保留 `富国岛香港游.html` 作为源
 - ✅ 原 HTML 和 `_分享版.html` 都是产物（`build_itinerary.py` → `build_base64.py`）
 - ✅ 修改走 `data.json`；跑 build 重新生成
+- ✅ `build_base64.py` 默认**拒绝覆盖原 HTML** — `--output` 必须以 `_分享版.html` / `_share.html` / `_base64.html` 结尾
 
 `.gitignore` 已包含：
 
@@ -139,7 +143,9 @@ templates/itinerary.js.tpl     # 共享 JS 渲染器
 2026国庆假期/方案*/*.html
 ```
 
-### 3.3 图片命名规则（与 sight id 解耦）
+### 3.3 图片命名规则
+
+**权威说明在 [`tools/README.md` §"图片命名规则"](tools/README.md)**。本节仅给摘要，详细规则（为何引入 hash、健康检查、CITY_PREFIX 常量、`image_credits.json` 结构）请读那份。
 
 **新规则**（已迁移完成）：
 
@@ -153,8 +159,6 @@ images/<city-prefix>_<sight-id>_<sha1-8hex>.jpg
 
 **全局不重名** 是硬性约束 — 改图/换图时必须重新算 SHA1 重命名。
 
-详见 `tools/README.md`。
-
 ---
 
 ## 4. 技术约束
@@ -166,6 +170,7 @@ images/<city-prefix>_<sight-id>_<sha1-8hex>.jpg
 - ✅ CDN 优先 `cdn.staticfile.net` / `cdn.bootcdn.net` / `lib.baomitu.com`
 - ❌ 避免 `unpkg.com` / `cdn.jsdelivr.net`（不稳定）
 - ❌ 避免 `tile.openstreetmap.org`（被墙）
+- AI 沙箱（Trae IDE）出网需经本地代理 `http://127.0.0.1:7897`（详见 `guides/MCP_RECOVERY.md`）
 
 ### 4.2 地图瓦片（核心踩坑）
 
@@ -181,13 +186,13 @@ images/<city-prefix>_<sight-id>_<sha1-8hex>.jpg
 - 智图 GeoQ / 天地图 / 谷歌 / OSM.org 国内均不可达
 - 智图 GeoQ / OSM 中文镜像 不存在或 404
 
-实现位置：HTML 内 `renderMap(city, ...)` 函数按 city 切换瓦片 URL。
+**实现位置**：`templates/itinerary.js.tpl` 的 `renderMap(city, ...)` 函数按 city 切换瓦片 URL；每方案 `data.json` 的 `cities[].map.tile` 字段指定具体源（`osm-de` / `amap` / `amap-satellite`）。
 
-### 4.3 HTML 渲染器约定
+### 4.3 emoji / Unicode 约定
 
-- 不在 HTML 里写 Markdown 语法（如 `**bold**`、`# header`）
-- 描述文本是纯文本
-- 代码中 emoji 可用，但避免花哨 Unicode（部分环境渲染异常）
+- **数据/正文**：克制使用 emoji（多数方案正文里基本没有）
+- **UI 装饰**：模板/CSS/JS 里的视觉点缀可用 emoji
+- **避免花哨 Unicode**：部分环境（老 Android 微信、邮件客户端）渲染异常（变方块/乱码）
 
 ---
 
@@ -199,9 +204,9 @@ images/<city-prefix>_<sight-id>_<sha1-8hex>.jpg
 # 1. 抓图（Wikimedia Commons） — 写 data.json 后跑
 python3 tools/fetch_image.py <方案目录>
 
-# 2. 校验 data.json
-python3 tools/validate_itinerary.py <方案目录> --html <方案目录>/<名>游.html
-python3 tools/regress_itinerary.py  <方案目录> --html <方案目录>/<名>游.html
+# 2. 校验 data.json（--html 用相对方案目录的路径）
+python3 tools/validate_itinerary.py <方案目录> --html <名>游.html
+python3 tools/regress_itinerary.py  <方案目录> --html <名>游.html
 
 # 3. 构建产物
 python3 tools/build_itinerary.py  <方案目录>        # 生成 <名>游.html
@@ -209,7 +214,7 @@ python3 tools/build_base64.py     <方案目录> \
   --html <名>游.html --output <名>游_分享版.html
 ```
 
-详细用法见 `tools/README.md`。`build_base64.py` 默认拒绝覆盖原 HTML — 输出名必须以 `_分享版.html` / `_share.html` / `_base64.html` 结尾。
+详细用法见 [`tools/README.md`](tools/README.md)。
 
 ### 5.2 校验与构建职责
 
@@ -220,6 +225,20 @@ python3 tools/build_base64.py     <方案目录> \
 - `baseline_<方案目录名>.json` — 每个方案的渲染器计数基线
 
 任何硬错误都会退出码 1，不静默通过。
+
+### 5.3 权威性等级（边界声明）
+
+为避免文档间职责混乱，本项目文档权威性分级如下：
+
+| 文档 | 性质 | 何时以它为准 |
+|---|---|---|
+| `tools/README.md` | 工具权威（脚本签名、参数、规则细节） | 写/改 `tools/*.py` 或跑工具报错时 |
+| `AGENTS.md`（本文件） | 协作约定（软约束、流程、偏好） | 不确定先做什么、怎么和用户沟通时 |
+| `lesson_learnt.md` | 经验沉淀（踩坑、隐性 bug） | 改图、改渲染器、改方案结构时**先翻一下** |
+| `guides/MCP_RECOVERY.md` | 基础设施操作手册 | 新机器恢复 MCP、改 mcp.json 时 |
+| `工作方法.md` / `背景信息.md` | 当前项目的输入资料 | 规划具体方案时 |
+
+冲突时**优先级别高的为准**。若仍模糊，问用户。
 
 ---
 
@@ -234,18 +253,29 @@ python3 tools/build_base64.py     <方案目录> \
 3. 改人数 → 同步改预算/酒店房型/机票张数
 4. 清理未验证信息 → 全文搜索后删除
 
+> 历史教训：方案A 早期 `方案A_普吉岛清迈/顾问10天参考行程.md`（卡马拉+椰子岛别墅+皇帝岛 The Racha）已被实际方案（卡伦+椰子岛+清迈）替代。该文件**已于 2026-08 删除**，git 历史可查。
+
 ### 6.2 提交信息风格
 
-参考最近提交风格：
+参考最近 12 个提交（按 `git log --oneline -12`）：
 
 ```
-feat: 行程优化 — 航班改廉航 + 酒店精简 + 别墅方案
-docs: 移除领队相关描述（自由行无领队）
+refactor: 引入 templates/ 通用骨架 + data.json 数据源分离
+refactor: 渲染器按 data.cities 数据化驱动 + 回归基线
+docs: 新增 AGENTS.md（AI 协作约定）+ 清理工作方法措辞
 chore: 清理图片命名 + 移除 MD 加粗 + 忽略分享版
-fix: 富国岛地图切换到 OSM-DE
+docs: 移除领队相关描述（自由行无领队）
+feat: 行程优化 — 航班改廉航 + 酒店精简 + 别墅方案
+fix: 富国岛地图切换到 OSM-DE（高德对越南只到路网级 + 无卫星图）
+fix: 切换地图为国内 CDN + 高德瓦片（解决境外网络依赖）
+feat: 方案A 转向同行人视角(删概览/填价格/加预算表)
+feat: 方案A 普吉行程重构 — 卡伦3晚+椰子岛2晚+清迈精确到小时
+feat: 切换富国岛北岛为喜来登，删除备选温佩，移除地理分块理由，更新预算
+feat: 香港段行程时间优化 — 抵港缓冲+摩天轮上午+离港精简
+fix: Leaflet CDN 切换 + 香港范围收紧 + 移除待确认
 ```
 
-格式：`type: 中文一句话描述`，正文展开。
+格式：`type: 中文一句话描述`，正文展开。常见 `type`：`feat` / `fix` / `refactor` / `docs` / `chore` / `merge`。
 
 ---
 
